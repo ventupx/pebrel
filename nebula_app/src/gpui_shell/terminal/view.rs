@@ -498,6 +498,7 @@ impl TerminalView {
     /// 尾沿去抖窗口：视口静默这么久才向 Term/ConPTY 提交一次 resize。
     /// 见 `set_layout` 内的合同注释（conhost rewrap 漂移取证）。
     const RESIZE_SETTLE_DELAY: std::time::Duration = std::time::Duration::from_millis(150);
+    const CONTENT_PADDING_TOP: f32 = 4.0;
 
     /// 首帧前的当前单元格度量（与 element prepaint 同一公式：shape "M" 的
     /// advance / ascent / descent + 配置 offset）。让 spawn 网格与首帧布局一致，避免启动
@@ -542,7 +543,7 @@ impl TerminalView {
         }
         let changed = std::mem::replace(&mut self.output_visible, visible) != visible;
         if changed {
-            self.restart_cursor_blink(cx);
+            self.reset_cursor_blink(cx);
         }
         if changed && visible {
             // Hidden output deliberately did not invalidate the cached view.
@@ -826,6 +827,11 @@ impl TerminalView {
     }
 
     fn restart_cursor_blink(&mut self, cx: &mut Context<Self>) {
+        self.reset_cursor_blink(cx);
+        cx.notify();
+    }
+
+    fn reset_cursor_blink(&mut self, cx: &mut Context<Self>) {
         let style = cx
             .try_global::<Settings>()
             .map(|settings| settings.cursor_blink_style)
@@ -836,7 +842,6 @@ impl TerminalView {
         if self.cursor_should_blink() {
             self.schedule_cursor_blink_tick(epoch, cx);
         }
-        cx.notify();
     }
 
     fn schedule_cursor_blink_tick(&self, epoch: u64, cx: &mut Context<Self>) {
@@ -1465,7 +1470,7 @@ impl Render for TerminalView {
             // 只属于整个终端卡外壳；分屏 pane 自己带圆角会露出四个独立卡片。
             // 卡内边距：顶部 4px 收紧 chrome 下方留白，底部 8px，左右 12px。
             // 网格因此不贴圆角；padding 区点击由 grid_point 的钳制兜底。
-            .pt(px(4.0))
+            .pt(px(Self::CONTENT_PADDING_TOP))
             .pb(px(8.0))
             .px(px(12.0))
             .track_focus(&self.focus_handle)

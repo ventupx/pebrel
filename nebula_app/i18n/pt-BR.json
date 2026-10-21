@@ -8,7 +8,7 @@
   "settings": {
     "opacity": {
       "title": "Opacidade do fundo da janela",
-      "description": "Aplica-se aos fundos do terminal e das configurações. 100% é totalmente opaco; valores menores aumentam a transparência. O texto e os ícones permanecem opacos."
+      "description": "Valores menores deixam os fundos do terminal e das configurações mais transparentes. O texto fica opaco."
     },
     "cursor_blink": {
       "title": "Estilo de intermitência do cursor",

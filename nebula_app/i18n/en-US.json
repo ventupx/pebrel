@@ -88,7 +88,7 @@
   "settings": {
     "opacity": {
       "title": "Window background opacity",
-      "description": "Applies to terminal and Settings backgrounds. 100% is fully opaque; lower values make the background more transparent. Text and icons stay opaque."
+      "description": "Lower values make terminal and Settings backgrounds more transparent. Text stays opaque."
     },
     "quick_terminal_unavailable": "Global shortcut could not be registered: {error}. Enable a GlobalShortcuts desktop portal or use the tray to show Pebrel.",
     "completion": {
