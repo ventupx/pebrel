@@ -6,17 +6,17 @@ Every release entry is provided in English and Simplified Chinese.
 
 ## 2.3.1 - 2026-10-21
 
-- `Pebrel-v2.3.1-linux-x64-preview.AppImage`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-linux-x64-preview.deb`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-linux-x64-preview.tar.gz`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-macos-arm64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-macos-x64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-x64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-x64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-arm64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-arm64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-android-universal-preview.apk`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-relay-manual.tar.gz`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-linux-x64-preview.AppImage`: `e4847c701f0622aeb4343ba881d586f942fbdca3e3b4794fdb173498ddc86af2`
+- `Pebrel-v2.3.1-linux-x64-preview.deb`: `1458670bd6cc153ef8ada11258ec41db94006816ed29dc910550f33dea69c4f5`
+- `Pebrel-v2.3.1-linux-x64-preview.tar.gz`: `a56e07fc604a7be0277b60e633c0da3da04b927f30ae5e53d57041775876cf75`
+- `Pebrel-v2.3.1-macos-arm64-preview.dmg`: `fdaceb8c80cc072bd73aa1b031aeb2d1d1867000ad11f45dd3e38445c48d70e7`
+- `Pebrel-v2.3.1-macos-x64-preview.dmg`: `e0f4cae7023e640e3aaba6e8ee2a70514c8e59172e03278f7e20565e4904882b`
+- `Pebrel-v2.3.1-windows-x64.zip`: `5886d0bd09084ed155e1b5024badc4e9bb076814204d92c5c2f810e88b978e12`
+- `Pebrel-v2.3.1-windows-x64-setup.exe`: `93b03e6e9731b925ba6f8320f3f376dc7d7551fd3f17882043ecdf0448660bb7`
+- `Pebrel-v2.3.1-windows-arm64.zip`: `669f782206d1c36b2bc7995663f6a6b589c4c008730777d23b195a0c9ce4c199`
+- `Pebrel-v2.3.1-windows-arm64-setup.exe`: `303223b5cb73c173ed1960bb92d396383b0084883188ba3129a181bda16b7b71`
+- `Pebrel-v2.3.1-android-universal-preview.apk`: `9250b50cccbe02eccfccd306bd7708184ff02f349c29c49d227b3bb6c5d6a23f`
+- `Pebrel-v2.3.1-relay-manual.tar.gz`: `e7b5d3329c6fef975d9b96fb7a96283858ff8f665148b22284d3961adbc4bacb`
 
 ### English
 
