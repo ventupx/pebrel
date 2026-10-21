@@ -17,6 +17,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "視窗背景不透明度",
+      "description": "同時影響終端機與設定頁背景。100% 為完全不透明；數值越低，背景越透明。文字與圖示保持清晰。"
+    },
+    "cursor_blink": {
+      "title": "游標閃爍樣式",
+      "blink": "閃爍",
+      "smooth": "平滑",
+      "phase": "呼吸",
+      "expand": "伸縮",
+      "solid": "恆亮"
+    },
     "completion": {
       "mode": "補齊模式",
       "cycle": "切換補齊模式",

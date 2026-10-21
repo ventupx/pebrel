@@ -17,6 +17,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "ウィンドウ背景の不透明度",
+      "description": "ターミナルと設定ページの背景に適用されます。100% は完全に不透明で、値を下げるほど透明になります。文字とアイコンは不透明のままです。"
+    },
+    "cursor_blink": {
+      "title": "カーソルの点滅スタイル",
+      "blink": "点滅",
+      "smooth": "フェード",
+      "phase": "呼吸",
+      "expand": "伸縮",
+      "solid": "常時表示"
+    },
     "completion": {
       "mode": "補完モード",
       "cycle": "補完モードを切り替え",

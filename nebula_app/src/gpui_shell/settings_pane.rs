@@ -31,7 +31,7 @@ use setting_help::{SettingHelp, help};
 use std::sync::Arc;
 use std::time::Duration;
 
-use crate::gpui_shell::config::{DEFAULT_CURSOR_BLINK, effective_cursor_blink};
+use crate::gpui_shell::config::effective_cursor_blink;
 use crate::gpui_shell::prelude::*;
 use crate::gpui_shell::widgets::{NebulaButton, settings_control_height};
 
@@ -55,6 +55,7 @@ mod search_header;
 mod segmented;
 mod setting_help;
 mod terminal_effect;
+mod theme_management;
 mod theme_picker;
 
 mod initialization;
@@ -796,6 +797,8 @@ impl SettingsPane {
             "accept" => pick!(accept),
             "completion_style" => pick!(completion_style),
             "tabs_position" => pick!(tabs_position),
+            "tab_style" => pick!(tab_style),
+            "cursor_blink_style" => pick!(cursor_blink_style),
             "tab_reveal" => pick!(tab_reveal),
             "density" => pick!(density),
             "new_tab_position" => pick!(new_tab_position),
@@ -1674,14 +1677,8 @@ impl Render for SettingsPane {
                     },
                 ))
             })
-            // 旧壳设置页是独立的不透明 panel；终端壁纸只属于终端内容，
-            // 不应穿透设置文字和控件。
-            //
-            // 这层不透明底必须自带卡圆角：外层终端卡虽然 `overflow_hidden`，
-            // 但 GPUI 的裁剪是矩形 content_mask、不跟圆角，方角底会直接盖掉
-            // 卡的四个圆角——这就是设置页看着「四角是直角」的原因。
+            // 背景和圆角归 workspace 卡容器；此处再次铺底会叠加不透明度。
             .rounded(crate::gpui_shell::theme::card_radius(cx))
-            .bg(crate::gpui_shell::theme::settings_panel_bg(cx))
             .text_color(cx.theme().foreground)
             // 正文继承主字号；导航和搜索使用组件小字号，说明与徽标单独缩小。
             .text_size(px(base_px))

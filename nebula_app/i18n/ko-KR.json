@@ -6,6 +6,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "창 배경 불투명도",
+      "description": "터미널과 설정 페이지 배경에 적용됩니다. 100%는 완전히 불투명하며, 값이 낮을수록 투명해집니다. 텍스트와 아이콘은 불투명하게 유지됩니다."
+    },
+    "cursor_blink": {
+      "title": "커서 깜박임 스타일",
+      "blink": "깜박임",
+      "smooth": "페이드",
+      "phase": "호흡",
+      "expand": "확장",
+      "solid": "항상 표시"
+    },
     "sidebar": {
       "application": "애플리케이션",
       "appearance": "모양",

@@ -6,6 +6,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "Opacidade do fundo da janela",
+      "description": "Aplica-se aos fundos do terminal e das configurações. 100% é totalmente opaco; valores menores aumentam a transparência. O texto e os ícones permanecem opacos."
+    },
+    "cursor_blink": {
+      "title": "Estilo de intermitência do cursor",
+      "blink": "Piscar",
+      "smooth": "Suave",
+      "phase": "Pulsação",
+      "expand": "Expansão",
+      "solid": "Fixo"
+    },
     "sidebar": {
       "application": "Aplicativo",
       "appearance": "Aparência",

@@ -86,6 +86,10 @@
     }
   },
   "settings": {
+    "opacity": {
+      "title": "Window background opacity",
+      "description": "Applies to terminal and Settings backgrounds. 100% is fully opaque; lower values make the background more transparent. Text and icons stay opaque."
+    },
     "quick_terminal_unavailable": "Global shortcut could not be registered: {error}. Enable a GlobalShortcuts desktop portal or use the tray to show Pebrel.",
     "completion": {
       "mode": "Completion mode",
@@ -99,6 +103,21 @@
     "environment": {
       "refresh": "Refresh system environment for new terminals",
       "refresh_description": "Read current Windows environment settings when opening a terminal. Turn off to inherit the environment used to launch Pebrel, including temporary PATH entries. Open terminals are unchanged."
+    },
+    "tabs": {
+      "title": "Top tab style",
+      "description": "Chrome, a thin top line, or outlined tags. Tab widths follow their titles; long names fade out at the end.",
+      "chrome": "Chrome",
+      "minimal": "Minimal",
+      "tag": "Tag"
+    },
+    "cursor_blink": {
+      "title": "Cursor blinking style",
+      "blink": "Blink",
+      "smooth": "Smooth",
+      "phase": "Phase",
+      "expand": "Expand",
+      "solid": "Solid"
     },
     "cursor_motion": {
       "title": "Smooth cursor",
@@ -860,6 +879,8 @@
     "writing": "Writing file…"
   },
   "theme_editor": {
+    "edit_title": "Edit theme",
+    "edit_hint": "Saving updates this saved theme. Apply to use the changes in your terminal.",
     "title": "Customize theme",
     "description": "Adjust colors and typography; preview the result on the right.",
     "template": "Template",
@@ -937,6 +958,11 @@
     "window_blur": "Window blur / material"
   },
   "theme_picker": {
+    "delete_title": "Delete theme?",
+    "delete_body": "Delete “{name}”? This cannot be undone. If this theme is in use, Pebrel will switch to the default theme.",
+    "delete_error": "Could not delete the theme: {error}",
+    "delete_partial_error": "Switched to the default theme, but could not delete the theme: {error}",
+    "deleting": "Deleting…",
     "title": "Choose a theme",
     "all": "All",
     "light": "Light",

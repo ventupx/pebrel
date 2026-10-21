@@ -44,6 +44,25 @@ impl SettingsPane {
                                 this.set_cursor_motion(value, window, cx);
                                 return;
                             }
+                            if key == "cursor_blink_style" || key == "tab_style" {
+                                if let Err(error) =
+                                    this.try_persist(&[(key, (*value).to_owned())], cx)
+                                {
+                                    let current = if key == "tab_style" {
+                                        this.runtime.tab_style.settings_value()
+                                    } else {
+                                        this.runtime.cursor_blink_style.settings_value()
+                                    };
+                                    this.sync_select(key, current, window, cx);
+                                    super::super::toast::toast(
+                                        window,
+                                        cx,
+                                        crate::display::ToastKind::Warning,
+                                        error.to_string(),
+                                    );
+                                }
+                                return;
+                            }
                             if key == "notification_duration" {
                                 this.set_notification_duration(value, window, cx);
                                 return;
@@ -73,6 +92,20 @@ impl SettingsPane {
         );
         let cursor_current =
             runtime.cursor_shape.map(|shape| shape.settings_value()).unwrap_or("beam");
+        add_select(
+            "cursor_blink_style",
+            nebula_settings::CursorBlinkStyle::VALUES,
+            runtime.cursor_blink_style.settings_value(),
+            window,
+            cx,
+        );
+        add_select(
+            "tab_style",
+            nebula_settings::TabStyle::VALUES,
+            runtime.tab_style.settings_value(),
+            window,
+            cx,
+        );
         add_select(
             "cursor_motion",
             nebula_settings::CursorMotion::VALUES,

@@ -3,6 +3,7 @@ use super::*;
 
 impl Render for NebulaWorkspace {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        self.reconcile_tab_drag(cx);
         let theme_transition = self.theme_transition.render(window, cx);
         crate::gpui_shell::theme::sync_component_focus_ring(window, cx);
         if window.is_window_active() {
@@ -58,6 +59,13 @@ impl Render for NebulaWorkspace {
             }
         };
         let settings_active = self.settings_open;
+        let settings_content = settings_active
+            || matches!(self.tabs.get(self.active), Some(WorkspaceTab::Settings { .. }));
+        let content_background = if settings_content {
+            crate::gpui_shell::theme::settings_content_bg(cx)
+        } else {
+            crate::gpui_shell::theme::card_content_bg(cx)
+        };
         let top_tabs = self.tabs_position == nebula_settings::TabsPositionName::Top;
         let reader_focus = self.reader_focus_active(cx);
         // dock 预览：被拖 tab 悬于终端区时高亮目标半区（松手即挂到那侧）。
@@ -136,6 +144,15 @@ impl Render for NebulaWorkspace {
                 let pane_dragged = this.release_pane_drag(window, cx);
                 if this.release_tab_drag_at(event.position, window, cx) || pane_dragged {
                     // 真拖拽已经完成，不能再让源 tab 的 click 或终端选择收到释放。
+                    cx.stop_propagation();
+                }
+            }))
+            .on_mouse_up_out(MouseButton::Left, cx.listener(|this, event: &gpui::MouseUpEvent, window, cx| {
+                // Occluding tabs hide the root hitbox, including during a fast release
+                // before the drag overlay has painted its first frame.
+                if this.tab_drag.as_ref().is_some_and(|drag| drag.axis == TabDragAxis::Horizontal)
+                    && this.release_tab_drag_at(event.position, window, cx)
+                {
                     cx.stop_propagation();
                 }
             }))
@@ -317,7 +334,7 @@ impl Render for NebulaWorkspace {
                             div()
                                 .size_full()
                                 .rounded(px(card_style.radius))
-                                .bg(crate::gpui_shell::theme::card_content_bg(cx))
+                                .bg(content_background)
                                 .when(card_style.shadow, |card| {
                                     // 投影落在有圆角的这一层，才会跟着卡的形状走。
                                     // 父容器没有 overflow_hidden，所以 blur 可以溢出

@@ -25,7 +25,11 @@ mod background_effects;
 pub use background_effects::{BackgroundEffectRequest, BackgroundEffects};
 mod terminal_effects;
 pub use terminal_effects::{EffectAnimation, TerminalEffects};
+mod cursor_blink;
 mod cursor_motion;
+mod tab_style;
+pub use cursor_blink::CursorBlinkStyle;
+pub use tab_style::TabStyle;
 mod custom_theme;
 pub use cursor_motion::CursorMotion;
 pub use custom_theme::{
@@ -229,10 +233,12 @@ pub enum ThemeName {
     CoalDark,
     LinenLight,
     MossDark,
-    /// 深色：Nord 配色（Arctic Ice Studio 公开色板）。出厂默认。
+    /// 深色：用户提供的 One Dark 配色，出厂默认。
+    #[default]
+    OneDark,
+    /// 深色：Nord 配色（Arctic Ice Studio 公开色板）。
     ///
     /// 跟随系统时与 Nord Light 配对；显式主题选择保持独立。
-    #[default]
     Nord,
     /// 浅色：基于 Nord 色板的浅色适配。
     NordLight,
@@ -261,6 +267,7 @@ impl ThemeName {
             "CoalDark" => Self::CoalDark,
             "LinenLight" => Self::LinenLight,
             "MossDark" => Self::MossDark,
+            "OneDark" | "One Dark" => Self::OneDark,
             "Nord" => Self::Nord,
             "Paper" | "WarmSand" => Self::Paper,
             "NordLight" => Self::NordLight,
@@ -288,6 +295,7 @@ impl ThemeName {
             Self::CoalDark => "CoalDark",
             Self::LinenLight => "LinenLight",
             Self::MossDark => "MossDark",
+            Self::OneDark => "OneDark",
             Self::Nord => "Nord",
             Self::Paper => "WarmSand",
             Self::NordLight => "NordLight",
@@ -309,7 +317,8 @@ impl ThemeName {
         // 背景与 is_light 来自各主题 palette()；powerline 为提示符段色
         // （icon bg/fg、path bg/fg、branch bg/fg、time bg/fg）。
         match self {
-            Self::NordLight
+            Self::OneDark
+            | Self::NordLight
             | Self::Paper
             | Self::BreezeLight
             | Self::BreezeDark
@@ -1004,6 +1013,7 @@ pub struct RuntimeSettings {
     pub ligatures: Ligatures,
     pub cursor_shape: Option<CursorShapeName>,
     pub cursor_blink: Option<bool>,
+    pub cursor_blink_style: CursorBlinkStyle,
     pub cursor_motion: CursorMotion,
     pub copy_on_select: bool,
     /// Maximum retained history for new terminals, without altering open sessions.
@@ -1037,6 +1047,7 @@ pub struct RuntimeSettings {
     /// 全宽字形（CJK 等）bold run 用 Regular 字形（粗体提亮不加粗）。
     pub cjk_bold_regular: bool,
     pub tabs_position: TabsPositionName,
+    pub tab_style: TabStyle,
     pub tab_reveal: TabRevealName,
     pub density: DensityName,
     pub new_tab_position: NewTabPositionName,
@@ -1200,7 +1211,12 @@ impl RuntimeSettings {
                 .and_then(Ligatures::from_settings)
                 .unwrap_or_default(),
             cursor_shape: raw.value("cursor_shape").and_then(CursorShapeName::from_settings),
-            cursor_blink: raw.bool_on("cursor_blink"),
+            cursor_blink: raw
+                .value("cursor_blink_style")
+                .and_then(CursorBlinkStyle::from_settings)
+                .map(|style| style != CursorBlinkStyle::Solid)
+                .or_else(|| raw.bool_on("cursor_blink")),
+            cursor_blink_style: CursorBlinkStyle::resolve(raw),
             cursor_motion: raw
                 .value("cursor_motion")
                 .and_then(CursorMotion::from_settings)
@@ -1230,6 +1246,7 @@ impl RuntimeSettings {
                 .value("tabs_position")
                 .and_then(TabsPositionName::from_settings)
                 .unwrap_or_default(),
+            tab_style: raw.value("tab_style").and_then(TabStyle::from_settings).unwrap_or_default(),
             tab_reveal: raw
                 .value("tab_reveal")
                 .and_then(TabRevealName::from_settings)
@@ -1594,7 +1611,7 @@ mod tests {
         let settings = RuntimeSettings::from_raw(&RawSettings::from_text("theme=NoSuchTheme\n"));
         // 出厂默认逐项对照旧壳 nebula_settings_load。
         assert_eq!(settings.language, LanguagePref::System);
-        assert_eq!(settings.theme, ThemeName::Nord);
+        assert_eq!(settings.theme, ThemeName::OneDark);
         assert_eq!(settings.font_family, None);
         assert_eq!(settings.font_family_cjk, None);
         assert_eq!(settings.ui_font_family, None);

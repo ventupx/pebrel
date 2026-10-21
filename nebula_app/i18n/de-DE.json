@@ -6,6 +6,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "Deckkraft des Fensterhintergrunds",
+      "description": "Gilt für die Hintergründe von Terminal und Einstellungen. 100 % ist vollständig deckend; kleinere Werte erhöhen die Transparenz. Text und Symbole bleiben deckend."
+    },
+    "cursor_blink": {
+      "title": "Cursor-Blinkstil",
+      "blink": "Blinken",
+      "smooth": "Sanft",
+      "phase": "Pulsieren",
+      "expand": "Ausdehnen",
+      "solid": "Statisch"
+    },
     "sidebar": {
       "application": "Anwendung",
       "appearance": "Darstellung",

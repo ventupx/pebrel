@@ -174,6 +174,7 @@ pub(super) const ITEMS: &[PaletteItem] = &[
         search: "恢复外观默认 reset appearance default huifu waiguan moren",
         action: PaletteAction::ResetAppearance,
     },
+    theme_item(NebulaTheme::OneDark, "theme 主题 one dark onedark default 默认"),
     theme_item(NebulaTheme::BreezeLight, "theme 主题 breeze light"),
     theme_item(NebulaTheme::BreezeDark, "theme 主题 breeze dark"),
     theme_item(NebulaTheme::MintLight, "theme 主题 mint light"),

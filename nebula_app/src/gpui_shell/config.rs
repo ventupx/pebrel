@@ -76,6 +76,7 @@ pub struct Settings {
     pub(crate) resolved_theme: Arc<crate::gpui_shell::theme::ResolvedTheme>,
     pub cursor_shape: Option<CursorShape>,
     pub cursor_blink: Option<bool>,
+    pub cursor_blink_style: nebula_settings::CursorBlinkStyle,
     pub cursor_motion: nebula_settings::CursorMotion,
     /// 选区完成即复制（旧壳 `copy_on_select` 设置）。
     pub copy_on_select: bool,
@@ -92,6 +93,7 @@ pub struct Settings {
     /// 标签关闭按钮与标签插入动画都在渲染热路径读取，必须随全局设置驻留内存。
     pub tab_close_visible: bool,
     pub tab_reveal: nebula_settings::TabRevealName,
+    pub tab_style: nebula_settings::TabStyle,
     /// 命令补全设置（settings.txt 的 `ghost`/`completion_style`），
     /// 类型直接用旧壳 display 的语义枚举：接受键判定与样式分支两壳同源。
     pub ghost: bool,
@@ -293,6 +295,7 @@ impl Settings {
                 CursorShapeName::Hollow => CursorShape::HollowBlock,
             }),
             cursor_blink: runtime.cursor_blink,
+            cursor_blink_style: runtime.cursor_blink_style,
             cursor_motion: runtime.cursor_motion,
             copy_on_select: runtime.copy_on_select,
             scrollback_lines: runtime.scrollback_lines,
@@ -306,6 +309,7 @@ impl Settings {
             notification_duration: runtime.notification_duration,
             tab_close_visible: runtime.tab_close_visible,
             tab_reveal: runtime.tab_reveal,
+            tab_style: runtime.tab_style,
             ghost: runtime.ghost,
             completion_style: runtime.completion_style,
             cell_width_mode: runtime.cell_width_mode,

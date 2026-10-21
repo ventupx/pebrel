@@ -6,6 +6,18 @@
     "en_us": "English"
   },
   "settings": {
+    "opacity": {
+      "title": "Opacità dello sfondo della finestra",
+      "description": "Si applica agli sfondi del terminale e delle impostazioni. Il 100% è completamente opaco; valori inferiori aumentano la trasparenza. Testo e icone restano opachi."
+    },
+    "cursor_blink": {
+      "title": "Stile di lampeggio del cursore",
+      "blink": "Lampeggio",
+      "smooth": "Dissolvenza",
+      "phase": "Pulsazione",
+      "expand": "Espansione",
+      "solid": "Fisso"
+    },
     "sidebar": {
       "application": "Applicazione",
       "appearance": "Aspetto",

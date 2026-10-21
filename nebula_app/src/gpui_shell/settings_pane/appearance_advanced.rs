@@ -75,15 +75,20 @@ impl SettingsPane {
                 help("cursor_shape", language),
                 cx,
             ))
-            .child(self.switch_row(
-                "cursor_blink",
-                language.pick("光标闪烁", "Blink cursor"),
-                help("cursor_blink", language),
-                self.runtime.cursor_blink.unwrap_or(DEFAULT_CURSOR_BLINK),
+            .child(self.select_row(
+                "cursor_blink_style",
+                language.text(crate::i18n::Message::SettingsCursorBlinkTitle),
+                "",
                 cx,
             ));
         let interface = self
             .group(language.pick("界面", "Interface"), cx)
+            .child(self.select_row(
+                "tab_style",
+                language.text(crate::i18n::Message::SettingsTabsTitle),
+                language.text(crate::i18n::Message::SettingsTabsDescription),
+                cx,
+            ))
             .child(self.font_size_row(true, cx))
             .child(self.switch_row(
                 "dim_inactive_panes",
@@ -112,7 +117,7 @@ impl SettingsPane {
                 cx,
             ))
             .child(self.slider_row(
-                language.pick("终端正文不透明度", "Terminal content opacity"),
+                language.text(crate::i18n::Message::SettingsOpacityTitle),
                 help("opacity", language),
                 &self.opacity_slider,
                 opacity,

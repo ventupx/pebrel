@@ -38,6 +38,8 @@ const RESET_KEYS: &[&str] = &[
     "completion_style",
     "cjk_bold_regular",
     "tabs_position",
+    "tab_style",
+    "cursor_blink_style",
     "tab_reveal",
     "density",
     "new_tab_position",
@@ -149,6 +151,31 @@ fn restore_defaults_at(path: &Path) -> io::Result<Option<PathBuf>> {
 mod tests {
     use super::*;
     use crate::{RawSettings, RuntimeSettings};
+
+    #[test]
+    fn reset_restores_chrome_tabs_and_blinking_while_preserving_unrelated_keys() {
+        let text = default_settings_text(
+            "tab_style=tag\ncursor_blink_style=solid\ncursor_blink=0\ncustom=keep\n",
+        );
+        let runtime = RuntimeSettings::from_raw(&RawSettings::from_text(&text));
+        assert_eq!(runtime.tab_style, crate::TabStyle::Chrome);
+        assert_eq!(runtime.cursor_blink_style, crate::CursorBlinkStyle::Blink);
+        assert_eq!(runtime.cursor_blink, None);
+        assert!(text.contains("custom=keep"));
+    }
+
+    #[test]
+    fn reset_restores_one_dark_and_clears_previous_theme_overrides() {
+        let original = "theme=Nord\ncustom_theme=my-theme\nbackground=#ffffff\ntheme_foreground=#000000\nfollow_system_theme=1\nssh_hosts=keep\n";
+        let restored = default_settings_text(original);
+        let runtime = RuntimeSettings::from_raw(&RawSettings::from_text(&restored));
+        assert_eq!(runtime.theme, crate::ThemeName::OneDark);
+        assert_eq!(runtime.custom_theme, None);
+        assert_eq!(runtime.background, None);
+        assert_eq!(runtime.theme_foreground, None);
+        assert!(!runtime.follow_system_theme);
+        assert!(restored.contains("ssh_hosts=keep"));
+    }
 
     #[test]
     fn reset_restores_auto_scrollbar_visibility() {
