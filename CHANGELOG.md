@@ -4,19 +4,7 @@ Every release entry is provided in English and Simplified Chinese.
 
 每个版本条目均同时提供英文和简体中文说明。
 
-## 2.3.0 - 2026-10-21
-
-- `Pebrel-v2.3.0-linux-x64-preview.AppImage`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-linux-x64-preview.deb`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-linux-x64-preview.tar.gz`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-macos-arm64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-macos-x64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-windows-x64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-windows-x64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-windows-arm64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-windows-arm64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-android-universal-preview.apk`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.0-relay-manual.tar.gz`: `PENDING FINAL BUILD`
+## 2.3.1 - 2026-10-21
 
 ### English
 
@@ -29,6 +17,7 @@ Every release entry is provided in English and Simplified Chinese.
 
 #### Fixed
 
+- Kept output-copy controls aligned with the more compact terminal padding, and avoided extra redraws when hiding terminal panes.
 - Fixed background refreshes restoring an extra full-window fill, which made opacity values of 50% and above appear opaque on Windows. Terminal and Settings backgrounds now follow the same opacity preference while text, icons and dialogs remain readable.
 
 #### Improved
@@ -49,6 +38,7 @@ Every release entry is provided in English and Simplified Chinese.
 
 #### 修复
 
+- 终端顶部留白收紧后，输出复制按钮同步对齐正文；隐藏终端时不再因光标重置触发额外重绘。
 - 修复背景刷新时恢复额外整窗底色，导致 Windows 下 50% 及以上不透明度看起来完全不透明的问题。终端与设置页背景现在同步跟随不透明度设置，文字、图标和弹窗继续保持清晰。
 
 #### 改进
@@ -63,6 +53,20 @@ Every release entry is provided in English and Simplified Chinese.
 Thanks to [ventupx](https://github.com/ventupx) for the appearance improvements and fixes.
 
 感谢 [ventupx](https://github.com/ventupx) 对外观功能和问题修复的贡献。
+
+### SHA256
+
+- `Pebrel-v2.3.1-linux-x64-preview.AppImage`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-linux-x64-preview.deb`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-linux-x64-preview.tar.gz`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-macos-arm64-preview.dmg`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-macos-x64-preview.dmg`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-x64.zip`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-x64-setup.exe`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-arm64.zip`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-arm64-setup.exe`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-android-universal-preview.apk`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-relay-manual.tar.gz`: `PENDING FINAL BUILD`
 
 ## 2.2.2 - 2026-10-16
 
