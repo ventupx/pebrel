@@ -6,6 +6,18 @@ Every release entry is provided in English and Simplified Chinese.
 
 ## 2.3.1 - 2026-10-21
 
+- `Pebrel-v2.3.1-linux-x64-preview.AppImage`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-linux-x64-preview.deb`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-linux-x64-preview.tar.gz`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-macos-arm64-preview.dmg`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-macos-x64-preview.dmg`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-x64.zip`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-x64-setup.exe`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-arm64.zip`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-windows-arm64-setup.exe`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-android-universal-preview.apk`: `PENDING FINAL BUILD`
+- `Pebrel-v2.3.1-relay-manual.tar.gz`: `PENDING FINAL BUILD`
+
 ### English
 
 #### Added
@@ -53,20 +65,6 @@ Every release entry is provided in English and Simplified Chinese.
 Thanks to [ventupx](https://github.com/ventupx) for the appearance improvements and fixes.
 
 感谢 [ventupx](https://github.com/ventupx) 对外观功能和问题修复的贡献。
-
-### SHA256
-
-- `Pebrel-v2.3.1-linux-x64-preview.AppImage`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-linux-x64-preview.deb`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-linux-x64-preview.tar.gz`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-macos-arm64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-macos-x64-preview.dmg`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-x64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-x64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-arm64.zip`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-windows-arm64-setup.exe`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-android-universal-preview.apk`: `PENDING FINAL BUILD`
-- `Pebrel-v2.3.1-relay-manual.tar.gz`: `PENDING FINAL BUILD`
 
 ## 2.2.2 - 2026-10-16
 
