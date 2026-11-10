@@ -551,7 +551,10 @@ impl NebulaWorkspace {
                                     .invisible()
                                     .group_hover(hover_group, |slot| slot.visible())
                                     .when(tab_close_visible || settings_navigation, |slot| {
-                                            slot.child(Self::tab_status_icon(
+                                            // Keep the close glyph flush with the tab's
+                                            // trailing padding. The shared status-icon
+                                            // box centers glyphs and would inset it.
+                                            slot.child(
                                                 Button::new(("top-close-tab", ix))
                                                     .debug_selector(move || format!("top-close-tab-{ix}"))
                                                     .icon(IconName::Close)
@@ -563,7 +566,7 @@ impl NebulaWorkspace {
                                                             this.close_top_tab(ix, window, cx);
                                                         },
                                                     )),
-                                            ))
+                                            )
                                         }),
                             ),
                     )
