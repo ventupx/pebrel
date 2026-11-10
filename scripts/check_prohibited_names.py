@@ -21,7 +21,6 @@ PROHIBITED_PATTERNS = (
     re.compile(r"(?<![A-Za-z0-9_])herdr(?![A-Za-z0-9_])", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z0-9_])kaku(?![A-Za-z0-9_])", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z0-9_])orca(?![A-Za-z0-9_])", re.IGNORECASE),
-    re.compile(r"(?<![A-Za-z0-9_])tmux(?![A-Za-z0-9_])", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z0-9_])wezterm(?![A-Za-z0-9_])", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z0-9_])windows[-_ ]?terminal(?![A-Za-z0-9_])", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z0-9_])alacritty(?![A-Za-z0-9_])", re.IGNORECASE),
@@ -54,7 +53,6 @@ PROHIBITED_EXAMPLES = (
     "herdr",
     "kaku",
     "orca",
-    "tmux",
     "wezterm",
     "Windows Terminal",
     "Alacritty",
@@ -86,16 +84,16 @@ DEPENDENCY_REFERENCE_PATTERNS = (
     re.compile(r"\bsource\s*=\s*[\"']git\+https?://[^\"']+[\"']", re.IGNORECASE),
 )
 PROTOCOL_COMPATIBILITY_PATTERNS = (
+    re.compile(r"\bkitty\s+(?:graphics\s+protocol\b|图形协议)", re.IGNORECASE),
     re.compile(r"\bKITTY_[A-Z0-9_]+\b"),
     re.compile(r"\bkitty_(?:keyboard|seq|event|release|escape|input)[A-Za-z0-9_]*\b", re.IGNORECASE),
-    re.compile(r"\b(?:kitty|tmux)/(?:legacy|style|protocol)\b", re.IGNORECASE),
-    re.compile(r"\b(?:kitty|tmux)\s+(?:keyboard|protocol|escape|sequence)\b", re.IGNORECASE),
+    re.compile(r"\bkitty/(?:legacy|style|protocol)\b", re.IGNORECASE),
+    re.compile(r"\bkitty\s+(?:keyboard|protocol|escape|sequence)\b", re.IGNORECASE),
     re.compile(r"\bThemeFormat::(?:WindowsTerminal|Kitty|Ghostty|WezTerm|Alacritty)\b"),
     re.compile(
         r"unsupported theme format; use Pebrel JSON, Windows Terminal JSON, Kitty, Ghostty, WezTerm or Alacritty",
         re.IGNORECASE,
     ),
-    re.compile(r"\\x1bPtmux;"),
 )
 
 # 移动端的原生依赖路径和远端命令是构建/兼容接口；只剔除这些确切引用，
@@ -108,14 +106,11 @@ MOBILE_BUILD_REFERENCE_PATTERNS = tuple(re.compile(pattern) for pattern in (
     r"[\"']include/ghostty/vt\.h[\"']",
 ))
 REMOTE_SESSION_PATTERNS = tuple(re.compile(pattern) for pattern in (
-    r"\bSshSessionMode\.(?:TMUX|HERDR)\b",
-    r"\b(?:exec )?tmux (?:new-session -A -s|kill-session -t) '[^'\n]+'",
+    r"\bSshSessionMode\.HERDR\b",
     r"\bexec herdr(?=[\"'\s])",
     r"\bherdr session (?:attach|stop) '[^'\n]+'",
-    r"\bcommand -v (?:tmux|herdr)(?=\s+>)",
+    r"\bcommand -v herdr(?=\s+>)",
     r"\bGet-Command herdr(?= -ErrorAction\b)",
-    r"\btmux (?:list-sessions|list-windows)(?= -[a-zA-Z]\b)",
-    r"\btmux (?:select-window -t|display-message -p -t|attach-session -t)(?= )",
     r"\bherdr session list --json\b",
     r"\bherdr session attach(?= \$\{psQuote\()",
     r"\bherdr --session(?= \$\{(?:quote|psQuote)\()",
@@ -123,13 +118,38 @@ REMOTE_SESSION_PATTERNS = tuple(re.compile(pattern) for pattern in (
 # 发现器的类型标签是线协议的一部分；只允许明确的构造/分派位置，
 # 不放行任意字符串字面量，更不能吞掉同行的说明、链接或比较文案。
 REMOTE_DISCOVERY_TAG_PATTERNS = tuple(re.compile(pattern) for pattern in (
-    r'\bdata\["(?:tmux|herdr)"\]',
-    r'\bRemoteSession\("(?:tmux|herdr)"(?=,)',
-    r'\bsession\.kind (?:==|!=) "(?:tmux|herdr)"',
-    r'^\s*"(?:tmux|herdr)"(?= ->)',
+    r'\bdata\["herdr"\]',
+    r'\bSshSessionMode\.HERDR\s+->\s+"herdr"',
+    r'^\s*"herdr"(?= ->)',
     r'\bwarnings \+= "herdr"',
     r"\[char\]30 \+ 'herdr'(?= \+ \[char\]10)",
 ))
+# Model tags belong to the remote-session consumers and their behavioral tests,
+# not to arbitrary labels or UI strings elsewhere in the mobile tree.
+REMOTE_MODEL_REFERENCE_PATTERNS = tuple(re.compile(pattern) for pattern in (
+    r'\bRemoteSession\("herdr"(?=,)',
+    r'\b(?:session|it)\??\.kind (?:==|!=) "herdr"',
+))
+REMOTE_MODEL_CONSUMERS = (
+    "/connection/RemoteSessions.kt", "/connection/TmuxSessionControl.kt",
+    "/session/SessionRepository.kt",
+)
+
+
+def remote_reference_remainder(path: str, text: str) -> str:
+    is_test = path.startswith(("mobile/android/app/src/test/", "mobile/android/app/src/androidTest/"))
+    model_test = is_test and path.endswith("Test.kt") and any(
+        part in path for part in ("/connection/", "/session/")
+    )
+    if path.endswith(REMOTE_MODEL_CONSUMERS) or model_test:
+        for pattern in REMOTE_MODEL_REFERENCE_PATTERNS:
+            text = pattern.sub("", text)
+    if path.endswith("/connection/RemoteSessions.kt"):
+        for pattern in REMOTE_DISCOVERY_TAG_PATTERNS:
+            text = pattern.sub("", text)
+    for pattern in REMOTE_SESSION_PATTERNS:
+        text = pattern.sub("", text)
+    return text
 
 
 def mobile_reference_remainder(path: str, text: str) -> str:
@@ -151,13 +171,9 @@ def mobile_reference_remainder(path: str, text: str) -> str:
             "", text,
         )
     if path.startswith("mobile/android/app/src/") and path.endswith(".kt"):
-        for pattern in REMOTE_SESSION_PATTERNS:
-            text = pattern.sub("", text)
-        if path.endswith("/connection/RemoteSessions.kt"):
-            for pattern in REMOTE_DISCOVERY_TAG_PATTERNS:
-                text = pattern.sub("", text)
+        text = remote_reference_remainder(path, text)
         if path.endswith("/connection/SshSessionMode.kt"):
-            text = text.replace('TMUX("tmux")', "").replace('HERDR("herdr")', "")
+            text = text.replace('HERDR("herdr")', "")
     return text
 
 

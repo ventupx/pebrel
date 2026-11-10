@@ -24,6 +24,7 @@ use crate::gpui_shell::terminal::view::SidebarActivity;
 use crate::gpui_shell::widgets::toolbar_button;
 use crate::i18n::{Message, UiLanguage};
 
+use super::window_titlebar::title_bar_right_controls;
 use super::{
     NebulaWorkspace, NewWindow, OpenSettings, TAB_LABEL_ICON_SIZE, TAB_LABEL_ICON_W, TabDrag,
     TabDragAxis, TabPresentation, ToggleShellPicker, pane_header, title_bar_panel_controls,
@@ -38,8 +39,8 @@ const TOP_TAB_RESERVED_W: f32 = TOP_TAB_LEFT_INSET + 32.0 * 5.0 + 34.0 * 3.0 + 7
 /// 拖拽越界自动滚的触发带宽：指针进到视口左/右这么近就开始滚。
 const TOP_TAB_EDGE_BAND: f32 = 24.0;
 
-/// GPUI 横向滚动偏移是 ≤ 0（内容向左移），与 [`NebulaWorkspace::on_top_tabs_wheel`]
-/// 同一套符号。可滚范围因此是 `[-(strip - viewport), 0]`。
+/// GPUI 横向滚动偏移是 ≤ 0（内容向左移）。可滚范围因此是
+/// `[-(strip - viewport), 0]`。
 fn clamp_strip_offset(x: f32, strip_w: f32, viewport_w: f32) -> f32 {
     let max = (strip_w - viewport_w).max(0.0);
     x.clamp(-max, 0.0)
@@ -58,12 +59,6 @@ fn at_strip_start(x: f32) -> bool {
 
 fn at_strip_end(x: f32, strip_w: f32, viewport_w: f32) -> bool {
     x <= -(strip_w - viewport_w).max(0.0) + 0.5
-}
-
-/// 普通鼠标滚轮没有 X 分量时，把主滚动轴映射到横向；触控板原生横向
-/// 分量更强时则保留它。
-fn horizontal_wheel_delta(x: f32, y: f32) -> f32 {
-    if x.abs() > y.abs() { x } else { y }
 }
 
 /// 顶部加号的生产调用点与鼠标测试共用同一个元素构造，避免测试只证明
@@ -139,7 +134,7 @@ impl NebulaWorkspace {
             .unwrap_or(nebula_settings::TabRevealName::Slide);
         let chrome_family = theme.font_family.clone();
         let metadata_family = theme.mono_font_family.clone();
-        let symbol_family: SharedString = crate::font_install::REQUIRED_FONT_FAMILY.into();
+        let symbol_family: SharedString = crate::font_install::SYMBOL_FONT_FAMILY.into();
         let label_px = settings.map(|settings| settings.ui_font_size_px).unwrap_or(15.0);
         let port_forward_w = if port_forward_button.is_some() { 32.0 } else { 0.0 };
         let tab_capacity_w =
@@ -184,11 +179,7 @@ impl NebulaWorkspace {
                     0.0
                 };
                 let admin = if tab.local_administrator { TAB_LABEL_ICON_SIZE + 8.0 } else { 0.0 };
-                let badge = if tab.pane_count > 1 {
-                    pane_header::split_badge_slot_w(label_px) + 8.0
-                } else {
-                    0.0
-                };
+                let badge = if tab.pane_count > 1 { 28.0 } else { 0.0 };
                 text_widths[ix]
                     + if tab_style == nebula_settings::TabStyle::Tag { 2.0 } else { 0.0 }
                     + tab_padding * 2.0
@@ -224,7 +215,6 @@ impl NebulaWorkspace {
             .as_ref()
             .filter(|drag| drag.active && drag.axis == TabDragAxis::Horizontal)
             .map(|drag| (drag.source, Self::drag_slot(drag, self.tabs.len()), drag.offset));
-        let items_running = std::cell::Cell::new(false);
         let items = presentations.into_iter().enumerate()
             .map(|(ix, presentation)| {
                 let tab_w = layout.tab_width(ix);
@@ -255,12 +245,9 @@ impl NebulaWorkspace {
                 let status_width = status_widths[ix];
                 let resting_status: Option<gpui::AnyElement> = match activity {
                     SidebarActivity::Running => {
-                        if active {
-                            items_running.set(true);
-                        }
                         let (track, head) =
                             crate::gpui_shell::theme::sidebar_spinner_colors(cx, active);
-                        Some(Self::spinner(self.spinner_phase, track, head).into_any_element())
+                        Some(Self::spinner(self.spinner_phase, track, head, cx.weak_entity()).into_any_element())
                     },
                     SidebarActivity::Paused => Some(
                         Icon::new(IconName::Pause)
@@ -284,11 +271,11 @@ impl NebulaWorkspace {
                             .into_any_element(),
                     ),
                     SidebarActivity::WaitingInput => Some(
-                        Self::waiting_hand(symbol_family.clone(), label_px, theme.primary)
+                        Self::waiting_hand(label_px, theme.primary)
                             .into_any_element(),
                     ),
                     SidebarActivity::Attention => Some(
-                        Self::waiting_hand(symbol_family.clone(), label_px, theme.warning)
+                        Self::waiting_hand(label_px, theme.warning)
                             .into_any_element(),
                     ),
                     SidebarActivity::Failed => Some(
@@ -340,8 +327,8 @@ impl NebulaWorkspace {
                     .font_weight(FontWeight::NORMAL)
                     .cursor_pointer()
                     // TitleBar 的父层是 WindowControlArea::Drag；tab 必须自己
-                    // 占住命中区，否则拖动标签会变成拖动窗口。
-                    .occlude()
+                    // 占住普通鼠标命中区，滚轮仍交给外层标签滚动容器。
+                    .block_mouse_except_scroll()
                     .when(active, |item| item.text_color(active_fg))
                     .when(!active && !dragged, |item| {
                         item.text_color(muted).when(tab_style != nebula_settings::TabStyle::Tag, |item| {
@@ -380,6 +367,7 @@ impl NebulaWorkspace {
                                 horizontal: Some((drag_layout.clone(), scroll_x)),
                                 offset: 0.0,
                                 active: false,
+                                force_tear_out: false,
                                 dock: None,
                             });
                         }),
@@ -457,7 +445,7 @@ impl NebulaWorkspace {
                                 .text_size(px(label_px))
                                 .font_weight(FontWeight::NORMAL)
                                 .text_color(if active { active_fg } else { muted })
-                                .child(glyph),
+                                .child(crate::gpui_shell::widgets::terminal_glyph(glyph, TAB_LABEL_ICON_SIZE)),
                         )
                     })
                     .when(
@@ -476,7 +464,7 @@ impl NebulaWorkspace {
                                     .child(pane_header::split_glyph(
                                         label_px * 0.78,
                                         if active { active_fg } else { muted },
-                                    )),
+                                )),
                             )
                         },
                     )
@@ -516,17 +504,23 @@ impl NebulaWorkspace {
                         row.child(
                             div()
                                 .id(("top-pane-count", ix))
+                                .size(px(28.0))
+                                .flex()
+                                .items_center()
+                                .justify_center()
+                                .rounded(px(4.0))
+                                .hover(|style| style.bg(theme.muted.opacity(0.5)))
+                                .active(|style| style.bg(theme.muted))
                                 .flex_shrink_0()
                                 .cursor_pointer()
                                 .on_click(cx.listener(move |this, _, window, cx| {
                                     cx.stop_propagation();
                                     this.cycle_pane_focus(ix, window, cx);
                                 }))
-                                .child(pane_header::split_badge(
-                                    pane_count,
+                                .child(pane_header::split_layout_icon(
+                                    &self.tabs[ix],
                                     label_px,
                                     if active { active_fg } else { muted },
-                                    if active { active_bg } else { theme.muted },
                                 )),
                         )
                     })
@@ -541,7 +535,11 @@ impl NebulaWorkspace {
                                         .justify_end()
                                         .items_center()
                                         .group_hover(hover_group.clone(), |item| item.invisible())
-                                        .child(status),
+                                        .child(if matches!(activity, SidebarActivity::Idle) {
+                                            status
+                                        } else {
+                                            Self::tab_status_icon(status).into_any_element()
+                                        }),
                                 )
                             })
                             .child(
@@ -553,7 +551,7 @@ impl NebulaWorkspace {
                                     .invisible()
                                     .group_hover(hover_group, |slot| slot.visible())
                                     .when(tab_close_visible || settings_navigation, |slot| {
-                                            slot.child(
+                                            slot.child(Self::tab_status_icon(
                                                 Button::new(("top-close-tab", ix))
                                                     .debug_selector(move || format!("top-close-tab-{ix}"))
                                                     .icon(IconName::Close)
@@ -565,7 +563,7 @@ impl NebulaWorkspace {
                                                             this.close_top_tab(ix, window, cx);
                                                         },
                                                     )),
-                                            )
+                                            ))
                                         }),
                             ),
                     )
@@ -603,10 +601,6 @@ impl NebulaWorkspace {
                 }
             })
             .collect::<Vec<_>>();
-        self.spinner_visible.set(items_running.get());
-        if items_running.get() {
-            self.arm_activity_spinner_frame(window, cx);
-        }
 
         let menu_workspace = cx.entity().downgrade();
 
@@ -653,11 +647,14 @@ impl NebulaWorkspace {
                             .min_w_0()
                             .h(px(row_height))
                             .overflow_hidden()
+                            // 保留内部滚动命中，截断外层原生标题栏 Drag 命中区。
+                            .occlude()
                             // 待命拖拽在越过 4px 前由此接收移动；激活后根罩层接管。
                             .on_mouse_move(cx.listener(|this, event, window, cx| {
                                 this.update_tab_drag(event, window, cx);
                             }))
-                            .on_scroll_wheel(cx.listener(Self::on_top_tabs_wheel))
+                            // 内层 GPUI scroller 是唯一偏移所有者；这里只消费事件。
+                            .on_scroll_wheel(|_, _, cx| cx.stop_propagation())
                             .child(
                                 h_flex()
                                     .id("top-tabs-scroll")
@@ -752,14 +749,14 @@ impl NebulaWorkspace {
             // 共享详情侧栏入口固定在其右侧。
             .child(div().h_full().flex_1().min_w_0())
             .child(
-                title_bar_panel_controls()
-                    .gap(px(8.0))
+                title_bar_right_controls()
                     .child(self.render_terminal_find_button(settings_active, cx))
                     .child(
                         toolbar_button(
                             "top-toggle-command-manager",
                             Icon::new(Icon::empty())
                                 .path(crate::gpui_shell::assets::nav::COMMAND_MANAGER),
+                            false,
                         )
                             .debug_selector(|| "command-manager-toggle".into())
                             .selected(self.command_manager_open)
@@ -772,24 +769,6 @@ impl NebulaWorkspace {
                     .child(self.render_right_sidebar_button(settings_active, cx)),
             )
             .into_any_element()
-    }
-
-    fn on_top_tabs_wheel(
-        &mut self,
-        event: &ScrollWheelEvent,
-        _window: &mut Window,
-        cx: &mut Context<Self>,
-    ) {
-        let delta = event.delta.pixel_delta(px(TOP_TAB_MIN_W * 0.6));
-        let delta = horizontal_wheel_delta(f32::from(delta.x), f32::from(delta.y));
-        if delta == 0.0 {
-            return;
-        }
-        let mut offset = self.top_tabs_scroll.offset();
-        offset.x += px(delta);
-        self.top_tabs_scroll.set_offset(offset);
-        cx.stop_propagation();
-        cx.notify();
     }
 
     fn nudge_top_tabs(&mut self, dir: f32, layout: &TabStripLayout, cx: &mut Context<Self>) {
@@ -830,12 +809,6 @@ impl NebulaWorkspace {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn wheel_uses_the_stronger_axis_for_horizontal_tabs() {
-        assert_eq!(horizontal_wheel_delta(2.0, -40.0), -40.0);
-        assert_eq!(horizontal_wheel_delta(24.0, -3.0), 24.0);
-    }
 
     #[test]
     fn nudge_buttons_only_exist_once_the_strip_overflows() {

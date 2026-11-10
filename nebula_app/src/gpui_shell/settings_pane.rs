@@ -45,6 +45,7 @@ mod appearance_picker;
 mod background_color;
 mod background_shader;
 mod backup;
+mod command_history;
 mod cursor_motion;
 mod design;
 mod font_picker;
@@ -65,12 +66,18 @@ mod localization;
 mod mobile;
 mod navigation;
 mod notifications;
+mod plugins;
+#[cfg(all(test, feature = "gpui-test-support"))]
+mod plugins_tests;
+mod plugins_view;
 mod shell_picker;
 #[cfg(all(test, feature = "gpui-test-support"))]
 mod shell_picker_tests;
 mod sponsor;
 mod status;
 mod theme_advanced;
+mod theme_community;
+mod theme_community_view;
 mod theme_editor;
 mod theme_foreground;
 mod theme_package;
@@ -98,6 +105,7 @@ pub enum SettingsPaneEvent {
     TerminalProfilesChanged,
     /// 设置页"连接"按钮：宿主开 SSH tab（连接语义在业务层）。
     LaunchSsh(String),
+    InstallAgent(crate::ai_agents::AgentKind),
 }
 
 pub(super) type SharedSelect = Entity<SelectState<Vec<SharedString>>>;
@@ -114,6 +122,7 @@ pub struct SettingsPane {
     active_section: usize,
     agents: agents::AgentSettingsState,
     mobile: mobile::MobileState,
+    plugins: plugins::PluginsState,
     appearance_picker: Option<appearance_picker::AppearancePicker>,
     appearance_picker_seq: u64,
     shader_picker: Option<Task<()>>,
@@ -169,8 +178,9 @@ pub struct SettingsPane {
     pub(super) proxy_test_seq: u64,
     pub(super) proxy_test_status: crate::display::ProxyTestStatus,
     provider_store: crate::ai_providers::ProviderStore,
-    /// Name / note / website / endpoint / model. API keys deliberately do not
-    /// use a GPUI text widget; the native credential dialog is write-only.
+    provider_ui: providers::ProviderUi,
+    /// Name / note / website / endpoint / model. Auth JSON is an ephemeral
+    /// editor draft owned by ProviderUi; secrets never enter ProviderStore.
     provider_inputs: Vec<Entity<InputState>>,
     provider_status: Option<ProviderStatus>,
     provider_test_seq: u64,
@@ -226,6 +236,7 @@ pub struct SettingsPane {
     font_imported: Vec<String>,
     font_family_input: Entity<InputState>,
     font_family_cjk_input: Entity<InputState>,
+    ui_font_family_input: Entity<InputState>,
     font_size_input: Entity<InputState>,
     font_size_editing: Option<bool>,
     /// 字体输入框上一帧的窗口坐标。字体目录是宽弹层，不能把整条设置行当
@@ -343,6 +354,7 @@ impl SettingsPane {
             (&self.ssh_icon_filter_input, "ssh_icon_filter"),
             (&self.font_family_input, "font_family"),
             (&self.font_family_cjk_input, "font_family"),
+            (&self.ui_font_family_input, "font_family"),
             (&self.backup_pass_input, "backup_password"),
             (&self.backup_secret_input, "backup_secret"),
         ] {
@@ -1329,7 +1341,8 @@ impl SettingsPane {
                 language.text(crate::i18n::Message::SettingsCompletionMode),
                 help("completion_style", language),
                 cx,
-            ));
+            ))
+            .child(self.command_history_row(cx));
         v_flex().w_full().gap(px(GROUP_GAP)).child(terminal).child(completion).child(alerts)
     }
 
@@ -1498,14 +1511,15 @@ impl SettingsPane {
             0 => self.section_home(window, cx),
             1 => self.section_appearance(window, cx),
             2 => self.section_profiles(window, cx),
-            3 => self.section_providers(cx),
+            3 => self.section_providers(window, cx),
             4 => self.section_ssh(window, cx),
             5 => self.section_network(cx),
             6 => self.section_interaction(cx),
             7 => self.section_keymap(cx),
             8 => self.section_advanced(cx),
-            10 => self.section_agents(cx),
+            10 => self.section_agents(window, cx),
             MOBILE_SECTION => self.section_mobile(window, cx),
+            PLUGINS_SECTION => self.section_plugins(window, cx),
             _ => self.section_backup(window, cx),
         }
         .into_any_element()
@@ -1568,6 +1582,7 @@ impl SettingsPane {
             nav = nav.child(
                 div()
                     .id(("settings-nav", ix))
+                    .debug_selector(move || format!("settings-nav-{ix}"))
                     .px(px(10.0))
                     .ml_1()
                     .mr_1()
@@ -1640,6 +1655,7 @@ impl Render for SettingsPane {
         let theme_package_modal = self.theme_package_modal(window, cx);
         let backup_drawer = self.backup_drawer(window, cx);
         let mobile_relay_modal = self.mobile_relay_modal(cx);
+        let provider_drawer = self.provider_drawer(window, cx);
         let application_page = self.active_section == 0;
         let mobile_page = self.active_section == MOBILE_SECTION;
 
@@ -1704,6 +1720,7 @@ impl Render for SettingsPane {
                             .pb(px(22.0))
                             .when(!application_page, |content| content.pt(px(28.0)).pb(px(30.0)))
                             .when(mobile_page, |content| content.p_0())
+                            .when(self.active_section == 3, |content| content.p_0())
                             // 注意这层包装 `v_flex` 的 `w_full` 不能删（2026-08-23
                             // 又栽了一次）：`overflow_y_scrollbar` 把内容层清成
                             // `Display::Block`，而 flex 容器在 block 父里
@@ -1741,7 +1758,7 @@ impl Render for SettingsPane {
                                     .child(
                                         v_flex()
                                             .w_full()
-                                            .when(matches!(self.active_section, 4 | 9 | 10 | MOBILE_SECTION), |content| {
+                                            .when(matches!(self.active_section, 4 | 9 | 10 | MOBILE_SECTION | PLUGINS_SECTION), |content| {
                                                 content.items_center()
                                             })
                                             .when(application_page, |content| content.max_w(px(960.0)))
@@ -1751,6 +1768,7 @@ impl Render for SettingsPane {
                     ),
             )
             .when_some(backup_drawer, |root, drawer| root.child(drawer))
+            .when_some(provider_drawer, |root, drawer| root.child(drawer))
             .when_some(ssh_editor_modal, |root, modal| root.child(modal))
             .when_some(appearance_picker_modal, |root, modal| root.child(modal))
             .when_some(theme_editor_modal, |root, modal| root.child(modal))
