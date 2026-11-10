@@ -4,6 +4,68 @@ Every release entry is provided in English and Simplified Chinese.
 
 每个版本条目均同时提供英文和简体中文说明。
 
+## 2.4.1 - 2026-11-10
+
+```text
+PENDING FINAL BUILD  Pebrel-v2.4.1-android-universal-preview.apk
+PENDING FINAL BUILD  Pebrel-v2.4.1-linux-x64-preview.AppImage
+PENDING FINAL BUILD  Pebrel-v2.4.1-linux-x64-preview.deb
+PENDING FINAL BUILD  Pebrel-v2.4.1-linux-x64-preview.tar.gz
+PENDING FINAL BUILD  Pebrel-v2.4.1-macos-arm64-preview.dmg
+PENDING FINAL BUILD  Pebrel-v2.4.1-macos-x64-preview.dmg
+PENDING FINAL BUILD  Pebrel-v2.4.1-relay-manual.tar.gz
+PENDING FINAL BUILD  Pebrel-v2.4.1-windows-arm64-setup.exe
+PENDING FINAL BUILD  Pebrel-v2.4.1-windows-arm64.zip
+PENDING FINAL BUILD  Pebrel-v2.4.1-windows-x64-setup.exe
+PENDING FINAL BUILD  Pebrel-v2.4.1-windows-x64.zip
+```
+
+### English
+
+macOS, Linux, and Android downloads are Preview builds.
+
+This fork release syncs the codebase with upstream Pebrel 2.4.0 through 2.5.0 and keeps the fork's appearance work. Update checks and download links now point at this fork, so the build never offers an upstream package.
+
+#### Added
+
+- Add the Community page in the theme picker plus `pebrel theme catalog` and `pebrel theme install`, synced from upstream 2.5.0.
+- Add the Settings Plugins page plus `pebrel plugin install`, `list`, `enable`, `disable` and `uninstall`, synced from upstream 2.5.0.
+- Add Shift+Insert paste on Windows and Linux, and a Japanese README, synced from upstream.
+- Keep the fork's One Dark default theme, saved-theme editing and deletion, Chrome/Minimal/Tag top tab styles and five cursor blink styles.
+
+#### Fixed
+
+- Sync upstream fixes for OpenCode and Antigravity conversation resume, idle SSH sessions, ZMODEM pane hangs, Windows pointer flicker and CJK bold/italic glyphs, stale editor completions and Android connection retention.
+- Keep the fork's window background opacity applied once across terminal and Settings instead of stacking an extra full-window fill.
+
+#### Improved
+
+- Keep content-sized top tabs with fading long titles, and adopt upstream's idle cursor pause and output frame throttling.
+- Point update discovery, fallback release pages, SHA256SUMS downloads and the repository link at `ventupx/pebrel` so the fork never offers upstream builds.
+
+### 中文
+
+macOS、Linux 和 Android 下载为预览版。
+
+本分支版本把代码同步到上游 Pebrel 2.4.0 至 2.5.0，同时保留本分支的外观改动。更新检查与下载链接现在指向本分支，不再提供上游安装包。
+
+#### 新增
+
+- 同步上游 2.5.0 的主题选择器「社区」页，以及 `pebrel theme catalog` 和 `pebrel theme install`。
+- 同步上游 2.5.0 的设置「插件」页，以及 `pebrel plugin install`、`list`、`enable`、`disable` 和 `uninstall`。
+- 同步上游的 Windows / Linux Shift+Insert 粘贴和日文 README。
+- 保留本分支的 One Dark 默认主题、已保存主题编辑与删除、谷歌/简约/标签三种顶部标签样式，以及五种光标闪烁样式。
+
+#### 修复
+
+- 同步上游对 OpenCode 与 Antigravity 会话恢复、空闲 SSH 会话、远程 ZMODEM 卡死、Windows 指针闪烁与中日韩粗斜体字形、编辑器过期补全、Android 连接保留等问题的修复。
+- 保留本分支的窗口背景不透明度只应用一次，不再叠加整窗底色。
+
+#### 改进
+
+- 保留按标题宽度自适应的顶部标签与超长标题渐隐，并采用上游的空闲光标停闪和输出帧节流。
+- 更新检查、回退发布页、SHA256SUMS 下载和仓库链接改为 `ventupx/pebrel`，不再提供上游安装包。
+
 ## 2.5.0 - 2026-11-09
 
 ```text
