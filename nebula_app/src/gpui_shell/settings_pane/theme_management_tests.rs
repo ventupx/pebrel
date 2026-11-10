@@ -154,6 +154,37 @@ fn deleting_active_theme_switches_to_default_and_busy_failure_can_be_retried(
 }
 
 #[gpui::test]
+fn deleting_a_saved_theme_keeps_broader_filters_renderable(cx: &mut TestAppContext) {
+    let _fixture_guard = lock_theme_studio();
+    let _settings_guard = SettingsBytesGuard::capture();
+    std::fs::write(nebula_settings::settings_path(), TEST_SETTINGS).unwrap();
+    let mut cleanup = CustomThemeCleanup::default();
+    let source = saved_fixture("000000-management-filter-delete", &mut cleanup);
+    let _remaining = saved_fixture("000001-management-filter-remaining", &mut cleanup);
+    let (pane, mut window) = open_settings(cx);
+    // The saved-theme helper leaves the picker on the saved-themes filter, so
+    // the registry narrowing must not strand the built-in cards behind it.
+    choose_saved_theme(&pane, &mut window, &source);
+    click("delete-custom-theme", &mut window);
+    click("confirm-dialog-ok", &mut window);
+    assert!(ThemeLibraryStore::default().load(source.id().unwrap()).is_err());
+    click("appearance-filter-0", &mut window);
+    assert!(window.debug_bounds("appearance-theme-grid").is_some());
+    pane.read_with(&mut window, |pane, _| {
+        let picker = pane.appearance_picker.as_ref().unwrap();
+        assert_eq!(picker.filter, 0);
+        let choices = picker.choices();
+        assert!(!choices.is_empty());
+        for choice in choices {
+            assert!(
+                picker.options.iter().any(|(option, _)| *option == choice),
+                "missing focus handle for {choice:?}"
+            );
+        }
+    });
+}
+
+#[gpui::test]
 fn saved_theme_edit_and_delete_controls_fit_a_narrow_picker(cx: &mut TestAppContext) {
     let _fixture_guard = lock_theme_studio();
     let _settings_guard = SettingsBytesGuard::capture();

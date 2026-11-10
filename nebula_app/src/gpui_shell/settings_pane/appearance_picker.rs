@@ -126,6 +126,14 @@ impl AppearancePicker {
         choices
     }
 
+    /// Rebuild the per-card focus registry so it matches [`Self::choices`] for
+    /// the current filter. Rendered cards look their focus handle up here, so
+    /// this must run whenever the filter or the saved-theme snapshot changes.
+    pub(super) fn refresh_options<T>(&mut self, cx: &mut Context<T>) {
+        self.options =
+            self.choices().into_iter().map(|choice| (choice, cx.focus_handle())).collect();
+    }
+
     pub(super) fn choice_label(
         &self,
         choice: AppearanceSelection,
@@ -335,11 +343,7 @@ impl SettingsPane {
                         }
                     }
                 }
-                picker.options = picker
-                    .choices()
-                    .into_iter()
-                    .map(|choice| (choice, cx.focus_handle()))
-                    .collect();
+                picker.refresh_options(cx);
             },
             Err(error) => {
                 picker.custom_load_error = Some(error.clone());
@@ -620,7 +624,16 @@ impl SettingsPane {
             .find(|choice| *choice == picker.draft)
             .or_else(|| visible.first().copied())
             .unwrap_or(picker.draft);
-        let focus = &picker.options.iter().find(|(option, _)| *option == choice).unwrap().1;
+        // The grid renders `choices()`, so every card normally has a focus
+        // handle here. A filter change or a library refresh can still make a
+        // rendered choice transiently absent from `options`; fall back to a
+        // detached handle instead of taking the whole settings pane down.
+        let focus = picker
+            .options
+            .iter()
+            .find(|(option, _)| *option == choice)
+            .map(|(_, focus)| focus.clone())
+            .unwrap_or_else(|| cx.focus_handle());
         let focused = focus.is_focused(window);
         let colors = AppearanceColors::current(cx);
         let language = crate::gpui_shell::config::ui_language(cx);
@@ -726,6 +739,10 @@ impl SettingsPane {
                                     return;
                                 }
                                 picker.filter = index;
+                                // Every rendered card looks up its focus handle
+                                // in `options`, so the registry has to follow
+                                // the filter just like `choices()` does.
+                                picker.refresh_options(cx);
                                 if picker.draft.is_theme()
                                     && index == super::theme_community::COMMUNITY_FILTER
                                 {

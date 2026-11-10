@@ -137,11 +137,7 @@ impl SettingsPane {
                             picker.draft = remap(picker.draft, picker.initial_draft);
                             picker.foreground_override = picker.initial_foreground_override;
                             picker.error = None;
-                            picker.options = picker
-                                .choices()
-                                .into_iter()
-                                .map(|choice| (choice, cx.focus_handle()))
-                                .collect();
+                            picker.refresh_options(cx);
                             window.focus(&picker.focus, cx);
                         }
                     },
