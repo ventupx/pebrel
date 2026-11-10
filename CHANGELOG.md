@@ -5,7 +5,6 @@ Every release entry is provided in English and Simplified Chinese.
 每个版本条目均同时提供英文和简体中文说明。
 
 ## 2.4.1 - 2026-11-10
-
 ```text
 PENDING FINAL BUILD  Pebrel-v2.4.1-android-universal-preview.apk
 PENDING FINAL BUILD  Pebrel-v2.4.1-linux-x64-preview.AppImage
@@ -22,9 +21,9 @@ PENDING FINAL BUILD  Pebrel-v2.4.1-windows-x64.zip
 
 ### English
 
-macOS, Linux, and Android downloads are Preview builds.
+This fork release syncs the codebase with upstream Pebrel 2.4.0 through 2.5.0 and keeps the fork's appearance work: the One Dark default theme, editable and deletable saved themes, three top tab styles, five cursor blink styles and a single window background opacity for terminal and Settings. Update checks, download links and the Settings repository link now point at `ventupx/pebrel`, so this build never offers an upstream package.
 
-This fork release syncs the codebase with upstream Pebrel 2.4.0 through 2.5.0 and keeps the fork's appearance work. Update checks and download links now point at this fork, so the build never offers an upstream package.
+Packages include Windows x64/ARM64 installers and portable ZIPs, macOS Apple Silicon/Intel builds, Linux x64 packages, an Android universal APK and the offline relay package. macOS, Linux and Android retain their Preview distribution labels.
 
 #### Added
 
@@ -45,9 +44,9 @@ This fork release syncs the codebase with upstream Pebrel 2.4.0 through 2.5.0 an
 
 ### 中文
 
-macOS、Linux 和 Android 下载为预览版。
+本分支版本把代码同步到上游 Pebrel 2.4.0 至 2.5.0，同时保留本分支的外观改动：One Dark 默认主题、已保存主题的编辑与删除、三种顶部标签样式、五种光标闪烁样式，以及终端与设置页统一的不透明度。更新检查、下载链接和设置页仓库链接现在都指向 `ventupx/pebrel`，不会推荐上游安装包。
 
-本分支版本把代码同步到上游 Pebrel 2.4.0 至 2.5.0，同时保留本分支的外观改动。更新检查与下载链接现在指向本分支，不再提供上游安装包。
+本次发布提供 Windows x64/ARM64 安装包与便携 ZIP、macOS Apple Silicon/Intel 构建、Linux x64 包、Android 通用 APK 和离线中转包。macOS、Linux 与 Android 仍保留预览版标识。
 
 #### 新增
 
@@ -65,6 +64,12 @@ macOS、Linux 和 Android 下载为预览版。
 
 - 保留按标题宽度自适应的顶部标签与超长标题渐隐，并采用上游的空闲光标停闪和输出帧节流。
 - 更新检查、回退发布页、SHA256SUMS 下载和仓库链接改为 `ventupx/pebrel`，不再提供上游安装包。
+
+### Contributors
+
+Fork maintenance by [ventupx](https://github.com/ventupx). Upstream work by [Kuddev](https://github.com/Kuddev) and upstream contributors.
+
+感谢 [ventupx](https://github.com/ventupx) 维护本分支，以及 [Kuddev](https://github.com/Kuddev) 与上游贡献者的工作。
 
 ## 2.5.0 - 2026-11-09
 
