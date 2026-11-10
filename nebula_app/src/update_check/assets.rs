@@ -68,7 +68,7 @@ pub(super) fn from_checksums(version: &str, text: &str) -> Option<UpdateAsset> {
             version: version.into(),
             name: name.clone(),
             download_url: format!(
-                "https://github.com/Kuddev/pebrel/releases/download/v{version}/{name}"
+                "https://github.com/ventupx/pebrel/releases/download/v{version}/{name}"
             ),
             size: None,
             sha256: hashes.into_iter().next(),

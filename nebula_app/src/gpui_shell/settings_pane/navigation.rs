@@ -3,7 +3,7 @@ use super::*;
 /// 主题下拉（展示名 = 持久化名，与旧壳一致）。
 pub(super) const THEME_VALUES: [&str; ThemeName::BUILTIN.len()] = ThemeName::BUILTIN_NAMES;
 
-pub(super) const REPOSITORY_URL: &str = "https://github.com/Kuddev/pebrel";
+pub(super) const REPOSITORY_URL: &str = "https://github.com/ventupx/pebrel";
 pub(super) const BUG_REPORT_TEMPLATE: &str = "bug_report.yml";
 
 /// 稳定路由只追加；视觉顺序独立放在 NAV_GROUPS，避免旧入口指向另一页。

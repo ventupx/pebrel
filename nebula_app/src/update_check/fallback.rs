@@ -9,8 +9,8 @@ use ureq::ResponseExt as _;
 use super::LatestRelease;
 use crate::i18n::{LanguagePreference, Message};
 
-const LATEST_PAGE: &str = "https://github.com/Kuddev/pebrel/releases/latest";
-const TAG_PREFIX: &str = "https://github.com/Kuddev/pebrel/releases/tag/";
+const LATEST_PAGE: &str = "https://github.com/ventupx/pebrel/releases/latest";
+const TAG_PREFIX: &str = "https://github.com/ventupx/pebrel/releases/tag/";
 
 pub(super) fn fetch_latest(status: u16) -> Result<LatestRelease, String> {
     log::info!("update-check: API returned HTTP {status}; checking official latest-release page");
@@ -35,7 +35,7 @@ pub(super) fn fetch_latest(status: u16) -> Result<LatestRelease, String> {
     // The official manifest restores verified download metadata during API limits.
     // If it is unavailable, version discovery still works with manual download.
     let url = format!(
-        "https://github.com/Kuddev/pebrel/releases/download/v{}/SHA256SUMS",
+        "https://github.com/ventupx/pebrel/releases/download/v{}/SHA256SUMS",
         release.version
     );
     let agent = crate::update_proxy::agent(&url, Duration::from_secs(10));
@@ -170,13 +170,13 @@ mod tests {
     #[test]
     fn redirect_transport_uses_the_final_location_without_parsing_html() {
         // The local CONNECT fixture uses HTTP; production agent requires HTTPS.
-        let destination = "http://github.com/Kuddev/pebrel/releases/tag/v1.9.0";
+        let destination = "http://github.com/ventupx/pebrel/releases/tag/v1.9.0";
         let server = Server::start(vec![
             response("302 Found", &format!("Location: {destination}\r\n"), ""),
             response("200 OK", "Content-Type: text/html\r\n", "<html>no metadata</html>"),
         ]);
         let uri =
-            redirected_uri(&server.agent(&[]), "http://github.com/Kuddev/pebrel/releases/latest")
+            redirected_uri(&server.agent(&[]), "http://github.com/ventupx/pebrel/releases/latest")
                 .unwrap();
         assert_eq!(uri, destination);
         let requests = server.finish();
@@ -194,16 +194,16 @@ mod tests {
             LATEST_PAGE,
             "https://github.com/login",
             "https://github.com/Other/pebrel/releases/tag/v99.0.0",
-            "http://github.com/Kuddev/pebrel/releases/tag/v1.9.0",
-            "https://github.com.evil.invalid/Kuddev/pebrel/releases/tag/v1.9.0",
-            "https://github.com/Kuddev/pebrel/releases/tag/v1.9.0?foo=bar",
-            "https://github.com/Kuddev/pebrel/releases/tag/v1.9.0#fragment",
-            "https://github.com/Kuddev/pebrel/releases/tag/v1.9.0/extra",
-            "https://github.com/Kuddev/pebrel/releases/tag/v1.9.0-rc1",
-            "https://github.com/Kuddev/pebrel/releases/tag/relay-abcd",
-            "https://github.com/Kuddev/pebrel/releases/tag/v1..0",
-            "https://github.com/Kuddev/pebrel/releases/tag/v01.9.0",
-            "https://github.com/Kuddev/pebrel/releases/tag/v18446744073709551616.0.0",
+            "http://github.com/ventupx/pebrel/releases/tag/v1.9.0",
+            "https://github.com.evil.invalid/ventupx/pebrel/releases/tag/v1.9.0",
+            "https://github.com/ventupx/pebrel/releases/tag/v1.9.0?foo=bar",
+            "https://github.com/ventupx/pebrel/releases/tag/v1.9.0#fragment",
+            "https://github.com/ventupx/pebrel/releases/tag/v1.9.0/extra",
+            "https://github.com/ventupx/pebrel/releases/tag/v1.9.0-rc1",
+            "https://github.com/ventupx/pebrel/releases/tag/relay-abcd",
+            "https://github.com/ventupx/pebrel/releases/tag/v1..0",
+            "https://github.com/ventupx/pebrel/releases/tag/v01.9.0",
+            "https://github.com/ventupx/pebrel/releases/tag/v18446744073709551616.0.0",
         ] {
             assert!(release_from_uri(uri).is_none(), "{uri}");
         }
