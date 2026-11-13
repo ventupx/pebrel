@@ -17,10 +17,10 @@ use nebula_settings::{RawSettings, RuntimeSettings, ThemeDefinition, ThemeName};
 mod background_tests;
 #[path = "theme_community_tests.rs"]
 mod community_tests;
-#[path = "management_tests.rs"]
-mod management_tests;
 #[path = "settings_layout_tests.rs"]
 mod layout_tests;
+#[path = "theme_management_tests.rs"]
+mod management_tests;
 #[path = "theme_package_tests.rs"]
 mod package_tests;
 #[path = "style_settings_tests.rs"]

@@ -26,8 +26,8 @@ use crate::i18n::{Message, UiLanguage};
 
 use super::window_titlebar::title_bar_right_controls;
 use super::{
-    NebulaWorkspace, NewWindow, OpenSettings, TabDrag, TabDragAxis, TabPresentation,
-    ToggleShellPicker, pane_header, title_bar_panel_controls,
+    NebulaWorkspace, NewWindow, OpenSettings, TAB_LABEL_ICON_SIZE, TAB_LABEL_ICON_W, TabDrag,
+    TabDragAxis, TabPresentation, ToggleShellPicker, pane_header, title_bar_panel_controls,
 };
 
 /// 与顶部模式正文卡片的 `px_2` 左边距同源，让首个 tab 和终端左缘对齐。
@@ -176,15 +176,7 @@ impl NebulaWorkspace {
                 if tab.renaming.is_some() {
                     return TOP_TAB_MAX_W;
                 }
-                let icon = if tab.is_settings
-                    || tab.logo_image.is_some()
-                    || tab.program_glyph.is_some()
-                    || tab.pane_count > 1
-                {
-                    TAB_LABEL_ICON_SIZE.max(TAB_LABEL_ICON_W) + 8.0
-                } else {
-                    0.0
-                };
+                let icon = TAB_LABEL_ICON_SIZE.max(TAB_LABEL_ICON_W) + 8.0;
                 let admin = if tab.local_administrator { TAB_LABEL_ICON_SIZE + 8.0 } else { 0.0 };
                 let badge = if tab.pane_count > 1 { 28.0 } else { 0.0 };
                 text_widths[ix]
@@ -198,7 +190,7 @@ impl NebulaWorkspace {
             })
             .collect();
         let inset = crate::platform::window_chrome::layout(window)
-            .map_or(TOP_TAB_LEFT_INSET, |(_, inset)| inset);
+            .map_or(TOP_TAB_LEFT_INSET, |layout| layout.left_inset);
         let layout = self
             .tab_drag
             .as_ref()

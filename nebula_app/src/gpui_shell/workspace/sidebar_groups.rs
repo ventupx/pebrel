@@ -565,6 +565,7 @@ mod tests {
         assert_eq!(rows.group_span(2), Some((2, 1..3)));
 
         let drag = TabDrag {
+            horizontal: None,
             source: 0,
             cross_window: None,
             cross_window_target: None,

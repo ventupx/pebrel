@@ -94,6 +94,32 @@ impl NebulaWorkspace {
             .child(icon)
     }
 
+    /// Reserve the shaped shell label's width, capped to leave room for the title.
+    pub(super) fn shell_status_width(
+        window: &Window,
+        tag: Option<&SharedString>,
+        family: &SharedString,
+        size_px: f32,
+        minimum: f32,
+        maximum: f32,
+    ) -> f32 {
+        let Some(tag) = tag else { return minimum };
+        let line = window.text_system().shape_line(
+            tag.clone(),
+            px(size_px),
+            &[gpui::TextRun {
+                len: tag.len(),
+                font: gpui::font(family.clone()),
+                color: gpui::Hsla::default(),
+                background_color: None,
+                underline: None,
+                strikethrough: None,
+            }],
+            None,
+        );
+        f32::from(line.width).ceil().clamp(minimum, maximum.max(minimum))
+    }
+
     pub(super) fn tab_status_lane() -> gpui::Div {
         h_flex().absolute().inset_0().justify_center().items_center()
     }
