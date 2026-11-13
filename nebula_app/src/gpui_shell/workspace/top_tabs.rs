@@ -13,9 +13,9 @@ use std::time::Duration;
 use gpui::prelude::FluentBuilder as _;
 use gpui::{
     Animation, AnimationExt as _, App, ClickEvent, Context, FontWeight, InteractiveElement as _,
-    IntoElement as _, KeyDownEvent, Length, MouseButton, MouseDownEvent, ObjectFit,
-    ParentElement as _, ScrollWheelEvent, SharedString, StatefulInteractiveElement as _,
-    Styled as _, StyledImage as _, Window, div, ease_out_quint, img, px,
+    IntoElement as _, KeyDownEvent, Length, MouseButton, MouseDownEvent, ParentElement as _,
+    ScrollWheelEvent, SharedString, StatefulInteractiveElement as _, Styled as _, Window, div,
+    ease_out_quint, px,
 };
 use gpui_component::menu::PopupMenuItem;
 
@@ -26,8 +26,8 @@ use crate::i18n::{Message, UiLanguage};
 
 use super::window_titlebar::title_bar_right_controls;
 use super::{
-    NebulaWorkspace, NewWindow, OpenSettings, TAB_LABEL_ICON_SIZE, TAB_LABEL_ICON_W, TabDrag,
-    TabDragAxis, TabPresentation, ToggleShellPicker, pane_header, title_bar_panel_controls,
+    NebulaWorkspace, NewWindow, OpenSettings, TabDrag, TabDragAxis, TabPresentation,
+    ToggleShellPicker, pane_header, title_bar_panel_controls,
 };
 
 /// 与顶部模式正文卡片的 `px_2` 左边距同源，让首个 tab 和终端左缘对齐。
@@ -35,7 +35,11 @@ pub(super) const TOP_TAB_LEFT_INSET: f32 = 8.0;
 const TOP_TAB_STATUS_W: f32 = 28.0;
 /// 标题栏中不属于 tab 视口的固定预算：左内边距、五枚 32px 操作按钮、
 /// 三枚 34px 窗口按钮，以及至少 72px 的可拖拽空白。
-const TOP_TAB_RESERVED_W: f32 = TOP_TAB_LEFT_INSET + 32.0 * 5.0 + 34.0 * 3.0 + 72.0;
+const TOP_TAB_RESERVED_W: f32 = TOP_TAB_LEFT_INSET
+    + 32.0 * 5.0
+    + 34.0 * 3.0
+    + 72.0
+    + crate::platform::window_chrome::RIGHT_CONTROLS_INSET;
 /// 拖拽越界自动滚的触发带宽：指针进到视口左/右这么近就开始滚。
 const TOP_TAB_EDGE_BAND: f32 = 24.0;
 
@@ -138,7 +142,6 @@ impl NebulaWorkspace {
             .unwrap_or(nebula_settings::TabRevealName::Slide);
         let chrome_family = theme.font_family.clone();
         let metadata_family = theme.mono_font_family.clone();
-        let symbol_family: SharedString = crate::font_install::SYMBOL_FONT_FAMILY.into();
         let label_px = settings.map(|settings| settings.ui_font_size_px).unwrap_or(15.0);
         let port_forward_w = if port_forward_button.is_some() { 32.0 } else { 0.0 };
         let tab_capacity_w =
@@ -232,11 +235,8 @@ impl NebulaWorkspace {
                 let TabPresentation {
                     title,
                     tooltip,
-                    is_settings,
                     activity,
-                    logo_image,
-                    logo_pending,
-                    program_glyph,
+                    icon,
                     shell_tag,
                     color,
                     renaming,
@@ -312,7 +312,7 @@ impl NebulaWorkspace {
 
                 let row = h_flex()
                     .id(("top-tab", ix))
-                    .when_some(tooltip, |row, text| row.tooltip(move |window, cx| {
+                    .when_some(tooltip.filter(|_| self.tab_menu.is_none()), |row, text| row.tooltip(move |window, cx| {
                         super::tab_presentation::tooltip(text.clone(), window, cx)
                     }))
                     .debug_selector(|| format!("top-tab-{ix}"))
@@ -416,62 +416,11 @@ impl NebulaWorkspace {
                             cx,
                         ))
                     })
-                    // 图标优先级与侧栏同源：先身份（跟随聚焦 pane），分屏标记
-                    // 只在没有身份图标时补位。理由见 sidebar.rs 同处注释。
-                    .when(is_settings, |row| {
-                        row.child(
-                            div()
-                                .w(px(TAB_LABEL_ICON_W))
-                                .flex_shrink_0()
-                                .flex()
-                                .justify_center()
-                                .child(
-                                    Icon::new(IconName::Settings)
-                                        .small()
-                                        .text_color(if active { active_fg } else { muted }),
-                                ),
-                        )
-                    })
-                    .when_some(logo_image.clone(), |row, image| {
-                        row.child(
-                            img(image)
-                                .size(px(TAB_LABEL_ICON_SIZE))
-                                .flex_shrink_0()
-                                .object_fit(ObjectFit::Contain),
-                        )
-                    })
-                    .when_some(program_glyph, |row, glyph| {
-                        row.child(
-                            div()
-                                .w(px(if logo_pending { TAB_LABEL_ICON_SIZE } else { TAB_LABEL_ICON_W }))
-                                .flex_shrink_0()
-                                .font_family(symbol_family.clone())
-                                .text_size(px(label_px))
-                                .font_weight(FontWeight::NORMAL)
-                                .text_color(if active { active_fg } else { muted })
-                                .child(crate::gpui_shell::widgets::terminal_glyph(glyph, TAB_LABEL_ICON_SIZE)),
-                        )
-                    })
-                    .when(
-                        pane_count > 1
-                            && !is_settings
-                            && logo_image.is_none()
-                            && program_glyph.is_none(),
-                        |row| {
-                            row.child(
-                                div()
-                                    .w(px(TAB_LABEL_ICON_W))
-                                    .flex_shrink_0()
-                                    .flex()
-                                    .items_center()
-                                    .justify_center()
-                                    .child(pane_header::split_glyph(
-                                        label_px * 0.78,
-                                        if active { active_fg } else { muted },
-                                )),
-                            )
-                        },
-                    )
+                    .child(icon.leading_slot(
+                        format!("top-tab-icon-{ix}").into(),
+                        if active { active_fg } else { muted },
+                        None,
+                    ))
                     .child(match renaming {
                         Some(input) => div()
                             .flex_1()
@@ -547,11 +496,7 @@ impl NebulaWorkspace {
                                 )
                             })
                             .child(
-                                h_flex()
-                                    .absolute()
-                                    .inset_0()
-                                    .justify_end()
-                                    .items_center()
+                                Self::tab_status_lane()
                                     .invisible()
                                     .group_hover(hover_group, |slot| slot.visible())
                                     .when(tab_close_visible || settings_navigation, |slot| {

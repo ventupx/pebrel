@@ -49,6 +49,7 @@ impl NebulaWorkspace {
                 }
                 cx.notify();
             },
+            TerminalViewEvent::HostIconChanged => cx.notify(),
             TerminalViewEvent::Exited => {
                 if let Some((tab_ix, pane_id)) = self.locate_pane(view.entity_id()) {
                     self.runtime_hub.record_pane_exited(self.runtime_window_id, pane_id);
@@ -172,6 +173,7 @@ mod tests {
     mod session_failure;
 
     use super::*;
+    use crate::gpui_shell::prelude::IconName;
     use crate::gpui_shell::terminal::element::snapshot_probe::{self, PaintedSnapshot};
     use crate::gpui_shell::terminal::view::TerminalLaunch;
     use gpui::{Modifiers, TestAppContext, VisualTestContext, point};
@@ -287,7 +289,7 @@ mod tests {
         window.executor().advance_clock(Duration::from_secs(1));
         window.run_until_parked();
         draw(&mut window);
-        draw(&mut window);
+        settle_sidebar_group_anchor(&mut window);
         for terminal in terminals.iter().take(pane_counts[0]) {
             assert!(painted(terminal, &mut window).text.contains("cache-output"));
         }
@@ -314,6 +316,13 @@ mod tests {
         assert_ne!(workspace.read_with(cx, |workspace, _| workspace.spinner_phase), phase);
         let after: Vec<_> = terminals.iter().map(|terminal| painted(terminal, cx).count).collect();
         assert_eq!(after, before, "spinner frames must reuse actual terminal paint");
+    }
+
+    fn settle_sidebar_group_anchor(cx: &mut VisualTestContext) {
+        // The grouping popover requests one frame when it first measures its
+        // anchor. Settle the mount before measuring ongoing spinner demand.
+        cx.update(|window, cx| window.simulate_next_frame(cx));
+        draw(cx);
     }
 
     fn spinner_tick(cx: &mut VisualTestContext) -> usize {
@@ -347,8 +356,8 @@ mod tests {
         assert_eq!(spinner_tick(cx), 0, "hidden badges must leave no frame demand");
     }
 
-    fn click_tabs_toggle(cx: &mut VisualTestContext) {
-        let position = cx.debug_bounds("sidebar-tabs-toggle").unwrap().center();
+    fn click_tabs_header(cx: &mut VisualTestContext) {
+        let position = cx.debug_bounds("sidebar-tabs-header").unwrap().center();
         cx.simulate_mouse_down(position, MouseButton::Left, Modifiers::default());
         cx.simulate_mouse_up(position, MouseButton::Left, Modifiers::default());
         draw(cx);
@@ -373,6 +382,74 @@ mod tests {
     }
 
     #[gpui::test]
+    fn remote_host_icon_changes_the_existing_tab_presentation(cx: &mut TestAppContext) {
+        use crate::gpui_shell::workspace::tab_presentation::TabIcon;
+
+        let (workspace, terminals, _receivers, mut window) = open_painted_workspace(&[1], cx);
+        terminals[0].update(&mut window, |view, cx| {
+            view.ssh_destination = Some("fixture-host".into());
+            view.running_program = None;
+            view.apply_ssh_host_icon(None, cx);
+        });
+        let icon = |window: &VisualTestContext| {
+            workspace
+                .read_with(window, |workspace, cx| workspace.tab_presentation(0, cx, false).icon)
+        };
+        assert!(matches!(icon(&window), TabIcon::Symbol(IconName::Network)));
+        terminals[0].update(&mut window, |view, cx| view.apply_ssh_host_icon(Some("ubuntu"), cx));
+        draw(&mut window);
+        assert!(matches!(icon(&window), TabIcon::Glyph(glyph)
+            if glyph.chars().eq([crate::display::ui::os_icons::resolve(Some("ubuntu")).glyph])));
+    }
+
+    #[gpui::test]
+    fn tab_leading_slot_keeps_its_position_during_ssh_and_icon_changes(cx: &mut TestAppContext) {
+        use crate::gpui_shell::workspace::tab_presentation::TabIcon;
+        use nebula_settings::TabsPositionName::{Sidebar, Top};
+
+        let (workspace, terminals, _receivers, mut window) = open_painted_workspace(&[1], cx);
+        let artwork = crate::shell_detect::color_icon_svgz("pwsh").unwrap();
+        for (position, icon_id, title_id) in [
+            (Sidebar, "sidebar-tab-icon-0", "sidebar-tab-title-0"),
+            (Top, "top-tab-icon-0", "top-tab-title-0"),
+        ] {
+            window.simulate_resize(size(px(840.0), px(560.0)));
+            workspace.update(&mut window, |workspace, cx| {
+                workspace.tabs_position = position;
+                cx.notify();
+            });
+            terminals[0].update(&mut window, |view, cx| {
+                view.running_program = None;
+                view.progress = crate::taskbar::TaskProgress::None;
+                view.shell_artwork = Some(artwork);
+                cx.notify();
+            });
+            draw(&mut window);
+            let bounds = window.debug_bounds(icon_id).unwrap();
+            let title_left = window.debug_bounds(title_id).unwrap().left();
+            assert!(bounds.right() <= title_left);
+            for (program, shell_visible) in [("ssh", true), ("git", false)] {
+                terminals[0].update(&mut window, |view, cx| {
+                    view.running_program = Some(program.into());
+                    view.progress = crate::taskbar::TaskProgress::Indeterminate;
+                    cx.notify();
+                });
+                draw(&mut window);
+                assert_eq!(window.debug_bounds(icon_id), Some(bounds));
+                assert_eq!(window.debug_bounds(title_id).unwrap().left(), title_left);
+                workspace.read_with(&window, |workspace, cx| {
+                    let presentation = workspace.tab_presentation(0, cx, false);
+                    assert_eq!(presentation.activity, SidebarActivity::Running);
+                    assert_eq!(
+                        matches!(presentation.icon, TabIcon::Shell(bytes) if bytes == artwork),
+                        shell_visible
+                    );
+                });
+            }
+        }
+    }
+
+    #[gpui::test]
     fn spinner_frames_reuse_single_terminal_snapshot(cx: &mut TestAppContext) {
         let (workspace, terminals, _receivers, mut window) = open_painted_workspace(&[1], cx);
         assert_spinner_reuses_terminal_paint(&workspace, &terminals, &mut window);
@@ -390,11 +467,8 @@ mod tests {
         draw(&mut window);
         assert_spinner_running(&workspace, &mut window);
 
-        click_tabs_toggle(&mut window);
-        assert!(workspace.read_with(&window, |workspace, _| workspace.tabs_section_collapsed));
-        assert_spinner_stopped(&workspace, &mut window);
-        click_tabs_toggle(&mut window);
-        assert!(!workspace.read_with(&window, |workspace, _| workspace.tabs_section_collapsed));
+        click_tabs_header(&mut window);
+        assert!(window.debug_bounds("sidebar-tab-0").is_some());
         assert_spinner_running(&workspace, &mut window);
 
         window.dispatch_action(ToggleSidebar);
@@ -403,6 +477,7 @@ mod tests {
         assert_spinner_stopped(&workspace, &mut window);
         window.dispatch_action(ToggleSidebar);
         draw(&mut window);
+        settle_sidebar_group_anchor(&mut window);
         assert_spinner_running(&workspace, &mut window);
 
         window.update(|window, _| assert!(window.is_window_active()));

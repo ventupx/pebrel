@@ -2,6 +2,33 @@
 
 use super::{TerminalView, last_path_component};
 
+/// Resolve once at launch so later changes to the default shell cannot relabel a live pane.
+pub(super) fn shell_artwork(
+    context: &crate::runtime_exec::PaneExecContext,
+    shell_name: Option<&str>,
+) -> Option<&'static [u8]> {
+    use crate::shell_detect::color_icon_svgz;
+
+    if let Some(distro) = context.wsl_distribution() {
+        return match distro {
+            Some(distro) => color_icon_svgz(&format!("wsl:{distro}")),
+            None => color_icon_svgz("wsl"),
+        };
+    }
+    let id = match context.shell_program() {
+        Some(program) => {
+            let filename = program.rsplit(['/', '\\']).next().unwrap_or(program);
+            std::borrow::Cow::Borrowed(std::path::Path::new(filename).file_stem()?.to_str()?)
+        },
+        None => std::borrow::Cow::Owned(crate::platform::shell::default_shell_id()),
+    };
+    // The Bash artwork belongs to Git Bash. Ordinary Unix Bash uses the terminal mark.
+    if !cfg!(windows) && id.eq_ignore_ascii_case("bash") {
+        return None;
+    }
+    color_icon_svgz(&id).or_else(|| shell_name.and_then(color_icon_svgz))
+}
+
 fn ssh_label(destination: Option<&str>, directory: &std::path::Path) -> Option<String> {
     let destination = destination?;
     let profiles = crate::ssh_profiles::SshProfiles::load(&directory.join("ssh_profiles.json"))

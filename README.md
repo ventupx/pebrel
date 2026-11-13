@@ -193,7 +193,7 @@ discover candidates from the current environment without matching prior commands
   [reader language behavior](docs/answer-reader-language.md).
 - Clipboard images are saved as PNG files and their paths inserted into local,
   WSL, or SSH sessions. Inline terminal images require CLI output using OSC 1337,
-  Kitty protocol (direct RGB/RGBA), or Sixel (7-bit DCS); image attachment previews
+  direct RGB/RGBA over APC, or Sixel (7-bit DCS); image attachment previews
   depend on the CLI itself.
 
 <p align="center">
