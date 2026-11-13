@@ -113,7 +113,7 @@ impl Fixture {
                 version: version.into(),
                 name: name.clone(),
                 download_url: format!(
-                    "https://github.com/Kuddev/pebrel/releases/download/v{version}/{name}"
+                    "https://github.com/ventupx/pebrel/releases/download/v{version}/{name}"
                 ),
                 size: Some(fs::metadata(&installer).unwrap().len()),
                 sha256: Some(hash.clone()),

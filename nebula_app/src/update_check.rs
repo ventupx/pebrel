@@ -533,7 +533,7 @@ mod tests {
         use serde_json::json;
 
         let version = "99.0.0";
-        let base = format!("https://github.com/Kuddev/pebrel/releases/download/v{version}");
+        let base = format!("https://github.com/ventupx/pebrel/releases/download/v{version}");
         let names = ["x64.zip", "arm64.zip", "x64-setup.exe", "arm64-setup.exe"];
         let assets: Vec<_> = names
             .iter()

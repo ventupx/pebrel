@@ -153,7 +153,7 @@ fn scheduled_snapshot_scope() {
         version: version.into(),
         name: name.clone(),
         download_url: format!(
-            "https://github.com/Kuddev/pebrel/releases/download/v{version}/{name}"
+            "https://github.com/ventupx/pebrel/releases/download/v{version}/{name}"
         ),
         size: Some(2),
         sha256: Some("a".repeat(64)),

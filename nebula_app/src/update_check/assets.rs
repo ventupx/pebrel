@@ -45,7 +45,7 @@ fn windows_zip(tag: &str, architecture: &str) -> Option<(String, String)> {
         _ => return None,
     };
     let name = format!("Pebrel-v{version}-windows-{architecture}.zip");
-    let url = format!("https://github.com/Kuddev/pebrel/releases/download/{tag}/{name}");
+    let url = format!("https://github.com/ventupx/pebrel/releases/download/{tag}/{name}");
     Some((name, url))
 }
 
@@ -180,7 +180,7 @@ mod tests {
         assert_eq!(
             portable_from_checksums("2.5.3", "aarch64", &entry).as_deref(),
             Some(
-                "https://github.com/Kuddev/pebrel/releases/download/v2.5.3/Pebrel-v2.5.3-windows-arm64.zip"
+                "https://github.com/ventupx/pebrel/releases/download/v2.5.3/Pebrel-v2.5.3-windows-arm64.zip"
             ),
         );
         assert!(portable_from_checksums("2.5.3", "x86_64", &entry).is_none());

@@ -20,7 +20,7 @@ use sha2::{Digest as _, Sha256};
 use crate::i18n::{Message, UiLanguage};
 use crate::update_check::UpdateAsset;
 
-const RELEASE_DOWNLOAD_PREFIX: &str = "https://github.com/Kuddev/pebrel/releases/download/";
+const RELEASE_DOWNLOAD_PREFIX: &str = "https://github.com/ventupx/pebrel/releases/download/";
 const LEGACY_RELEASE_DOWNLOAD_PREFIX: &str = "https://github.com/Kuddev/nebula/releases/download/";
 const MAX_INSTALLER_BYTES: u64 = 512 * 1024 * 1024;
 const DOWNLOAD_CHUNK_BYTES: usize = 64 * 1024;
@@ -675,6 +675,18 @@ mod tests {
         assert!(validate_windows_asset_contract(&asset(official, None)).is_err());
     }
 
+    #[test]
+    fn accepts_only_the_fork_release_download_prefix() {
+        let name = "NebulaTerminal-1.4.0-windows-x64-setup.exe";
+        let hash = "a".repeat(64);
+        let fork =
+            format!("https://github.com/ventupx/pebrel/releases/download/v1.4.0/{name}");
+        assert!(validate_windows_asset_contract(&asset(&fork, Some(hash.as_str()))).is_ok());
+        let upstream =
+            format!("https://github.com/Kuddev/pebrel/releases/download/v1.4.0/{name}");
+        assert!(validate_windows_asset_contract(&asset(&upstream, Some(hash.as_str()))).is_err());
+    }
+
     fn branded_asset(brand: &str) -> UpdateAsset {
         let name = format!("{brand}-1.6.0-windows-x64-setup.exe");
         UpdateAsset {
@@ -701,7 +713,7 @@ mod tests {
                 original.download_url.replace("github.com/", "github.com.evil.invalid/"),
                 original.download_url.replace("https://", "http://"),
                 format!("{}?download=1", original.download_url),
-                original.download_url.replace("Kuddev/pebrel/", "elsewhere/pebrel/"),
+                original.download_url.replace("ventupx/pebrel/", "elsewhere/pebrel/"),
             ] {
                 let mut candidate = original.clone();
                 candidate.download_url = url;

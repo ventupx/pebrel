@@ -49,7 +49,7 @@ fn nebula_fastfetch_text(narrow: bool) -> String {
             env!("CARGO_PKG_VERSION")
         ),
         format!(
-            "{icon}\u{f09b}{reset}  {dim}GitHub:{reset} {cyan}https://github.com/Kuddev/pebrel{reset}"
+            "{icon}\u{f09b}{reset}  {dim}GitHub:{reset} {cyan}https://github.com/ventupx/pebrel{reset}"
         ),
         format!(
             "{icon}\u{f11c}{reset}  {dim}Shortcuts:{reset}  {a}{white} new tab · {b}{white} switch tabs{reset}",

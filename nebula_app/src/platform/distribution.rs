@@ -196,7 +196,7 @@ mod tests {
                 let asset = crate::update_check::UpdateAsset {
                     version: version.into(),
                     download_url: format!(
-                        "https://github.com/Kuddev/pebrel/releases/download/v{version}/{name}"
+                        "https://github.com/ventupx/pebrel/releases/download/v{version}/{name}"
                     ),
                     name,
                     size: Some(42),
