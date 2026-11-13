@@ -541,6 +541,14 @@ impl NebulaTheme {
         skin.ink_dim = rgb8(p.muted);
         skin.ink_faint = skin.ink_dim;
         skin.icon = skin.ink_dim;
+        // One Dark's muted token is tuned for terminal comments on the dark
+        // canvas; on lifted settings cards it falls below the 4.5:1
+        // description floor. Chrome secondary ink keeps the slate ramp used
+        // by the other dark themes while the terminal palette stays exact.
+        if self == Self::OneDark {
+            skin.ink_dim = Rgb::new(148, 163, 184);
+            skin.icon = skin.ink_dim;
+        }
         skin.icon_hover = skin.ink;
         skin.accent = rgb8(p.accent);
         skin.accent_soft = wash(p.selected);

@@ -20,8 +20,8 @@ pub(super) fn render(
     overflow: f32,
 ) -> AnyElement {
     let label = div()
-        .id(("top-tab-label", index))
-        .debug_selector(move || format!("top-tab-label-{index}"))
+        .id(("top-tab-title", index))
+        .debug_selector(move || format!("top-tab-title-{index}"))
         .flex_1()
         .min_w_0()
         .overflow_hidden()

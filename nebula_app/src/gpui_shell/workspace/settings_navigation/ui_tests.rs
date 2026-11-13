@@ -294,7 +294,7 @@ fn top_tab_styles_size_titles_individually_and_preserve_hover_close(cx: &mut Tes
         assert_eq!(long.size.width, px(220.0));
         if style == TabStyle::Chrome {
             assert_eq!(first.right() - second.left(), px(10.0), "Chrome feet overlap");
-            let label = cx.debug_bounds("top-tab-label-0").unwrap();
+            let label = cx.debug_bounds("top-tab-title-0").unwrap();
             assert!(
                 (label.left() - first.left() - px(20.0 + TAB_LABEL_ICON_W + 8.0)).abs() <= px(1.0),
                 "selected title and leading icon clear the flared body"
@@ -334,7 +334,7 @@ fn long_top_titles_keep_static_fading_when_selected_or_hovered(cx: &mut TestAppC
     let hover = gpui::point(long.left() + px(14.0), long.center().y);
     cx.simulate_mouse_move(hover, None, Modifiers::default());
     tab_bounds("top-tab-1", &mut cx);
-    let label = cx.debug_bounds("top-tab-label-1").unwrap();
+    let label = cx.debug_bounds("top-tab-title-1").unwrap();
     let text = cx.debug_bounds("top-tab-title-text-1").expect("full title retains its origin");
     assert_eq!(cx.debug_bounds("top-tab-title-fade-1"), Some(fade));
     assert!(cx.debug_bounds("top-tab-title-moving-1").is_none());

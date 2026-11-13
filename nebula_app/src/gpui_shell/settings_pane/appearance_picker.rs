@@ -108,6 +108,30 @@ impl AppearancePicker {
     }
 
     pub(super) fn choices(&self) -> Vec<AppearanceSelection> {
+        // The Community filter replaces the theme grid, but its installed cards
+        // still look their focus handle up in `options`. Register exactly those
+        // saved themes so keyboard navigation and Enter reach the rendered card.
+        if self.draft.is_theme() && self.filter == super::theme_community::COMMUNITY_FILTER {
+            let Some(community) = self.community.as_ref() else { return Vec::new() };
+            let super::theme_community::CatalogLoad::Ready(listing) = &community.catalog else {
+                return Vec::new();
+            };
+            let mut installed = Vec::new();
+            for entry in &listing.entries {
+                let crate::theme_library::community::Installed::Current(theme_id) =
+                    crate::theme_library::community::installed(entry, &self.custom_themes)
+                else {
+                    continue;
+                };
+                if let Some(index) =
+                    self.custom_themes.iter().position(|doc| doc.id() == Some(theme_id.as_str()))
+                    && !installed.contains(&index)
+                {
+                    installed.push(index);
+                }
+            }
+            return installed.into_iter().map(AppearanceSelection::Custom).collect();
+        }
         let mut choices = self.draft.choices(self.filter);
         if self.draft.is_theme() {
             choices.extend(

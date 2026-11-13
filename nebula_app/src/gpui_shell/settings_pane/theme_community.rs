@@ -140,6 +140,12 @@ impl SettingsPane {
                             Vec::new()
                         },
                     };
+                    // Installed community cards track focus through the
+                    // picker's option registry, which now depends on the
+                    // catalog that just arrived.
+                    if let Some(picker) = this.appearance_picker.as_mut() {
+                        picker.refresh_options(cx);
+                    }
                     cx.notify();
                     Some(previews)
                 })

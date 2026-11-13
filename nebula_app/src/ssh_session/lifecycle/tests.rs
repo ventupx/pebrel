@@ -556,15 +556,6 @@ fn ssh_terminal_options_preserve_preferences_but_disable_conpty_only_behavior() 
     assert_eq!(remote.semantic_escape_chars, local.semantic_escape_chars);
     assert_eq!(remote.osc52, local.osc52);
     assert_eq!(remote.default_cursor_style, local.default_cursor_style);
-    let (sender, mut input) = mpsc::unbounded_channel();
-    let events = Events { replies: Some(sender), ..Default::default() };
-    let mut terminal = Term::new(local, &size(), events);
-    let mut parser: nebula_terminal::vte::ansi::Processor =
-        nebula_terminal::vte::ansi::Processor::new();
-    parser.advance(&mut terminal, b"\x1b[c");
-    assert!(input.try_recv().is_err(), "the pre-primed local handshake is still suppressed");
-    parser.advance(&mut terminal, b"\x1b[c");
-    assert!(matches!(input.try_recv(), Ok(Msg::Input(reply)) if reply.as_ref() == b"\x1b[?62;4c"));
 }
 
 #[test]

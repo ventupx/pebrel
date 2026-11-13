@@ -488,7 +488,11 @@ impl NebulaWorkspace {
                                 )
                             })
                             .child(
-                                Self::tab_status_lane()
+                                h_flex()
+                                    .absolute()
+                                    .inset_0()
+                                    .justify_end()
+                                    .items_center()
                                     .invisible()
                                     .group_hover(hover_group, |slot| slot.visible())
                                     .when(tab_close_visible || settings_navigation, |slot| {
