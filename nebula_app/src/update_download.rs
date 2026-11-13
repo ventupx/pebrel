@@ -679,11 +679,9 @@ mod tests {
     fn accepts_only_the_fork_release_download_prefix() {
         let name = "NebulaTerminal-1.4.0-windows-x64-setup.exe";
         let hash = "a".repeat(64);
-        let fork =
-            format!("https://github.com/ventupx/pebrel/releases/download/v1.4.0/{name}");
+        let fork = format!("https://github.com/ventupx/pebrel/releases/download/v1.4.0/{name}");
         assert!(validate_windows_asset_contract(&asset(&fork, Some(hash.as_str()))).is_ok());
-        let upstream =
-            format!("https://github.com/Kuddev/pebrel/releases/download/v1.4.0/{name}");
+        let upstream = format!("https://github.com/Kuddev/pebrel/releases/download/v1.4.0/{name}");
         assert!(validate_windows_asset_contract(&asset(&upstream, Some(hash.as_str()))).is_err());
     }
 
