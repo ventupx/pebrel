@@ -8,8 +8,6 @@ on:
         type: string
         default: ""
   workflow_call:
-  schedule:
-    - cron: "23 19 * * *"
   push:
     branches: [main]
   # 所有 PR 都规划验证；轻量改动无需先申请原生 runner 再跳过步骤。
@@ -258,7 +256,7 @@ jobs:
               message = "Executed successfully in this run's native matrix."
           else:
               message = ("Not run: this PR's paths do not require this platform. "
-                         "Full validation remains enabled on main, daily and manual runs.")
+                         "Full validation remains enabled on main and manual runs.")
           print(message)
           with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as summary:
               summary.write("## " + os.environ["CHECK_NAME"] + "\n\n" + message + "\n")
